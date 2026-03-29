@@ -1,0 +1,4 @@
+/* Toast animations — kept as plain CSS because Tailwind
+   animate-* variants need keyframe names defined in global.css */
+.toast-enter { animation: toastIn 320ms cubic-bezier(0.16,1,0.3,1) both; }
+.toast-progress-bar { animation: toastProgress 3500ms linear forwards; transform-origin: left; }

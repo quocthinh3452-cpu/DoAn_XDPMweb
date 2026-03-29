@@ -1,0 +1,330 @@
+/* CancelOrderModal.css */
+
+.cm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  z-index: 200;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  animation: cm-fade-in 0.18s ease;
+}
+
+@keyframes cm-fade-in { from { opacity: 0; } to { opacity: 1; } }
+
+.cm-modal {
+  background: var(--bg-card, #fff);
+  border-radius: 1.25rem;
+  width: 100%;
+  max-width: 460px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 8px 48px rgba(0, 0, 0, 0.18);
+  animation: cm-pop-in 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  overflow: hidden;
+}
+
+@keyframes cm-pop-in {
+  from { opacity: 0; transform: scale(0.94) translateY(8px); }
+  to   { opacity: 1; transform: scale(1)    translateY(0); }
+}
+
+/* ── Header ── */
+.cm-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.25rem 1.5rem 0.75rem;
+  flex-shrink: 0;
+}
+
+.cm-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: var(--text-primary, #111);
+  margin: 0;
+}
+
+.cm-close {
+  background: none;
+  border: none;
+  font-size: 1rem;
+  color: var(--text-secondary, #888);
+  cursor: pointer;
+  padding: 0.25rem;
+  line-height: 1;
+}
+
+/* ── Step dots ── */
+.cm-steps {
+  display: flex;
+  gap: 0.4rem;
+  padding: 0 1.5rem 0.75rem;
+  flex-shrink: 0;
+}
+
+.cm-step-dot {
+  height: 4px;
+  flex: 1;
+  border-radius: 99px;
+  background: var(--border, #e0e0e0);
+  transition: background 0.2s;
+}
+
+.cm-step-dot--active {
+  background: var(--accent, #1976d2);
+}
+
+/* ── Body ── */
+.cm-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 1.5rem 1rem;
+}
+
+.cm-order-ref {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
+  margin: 0 0 1rem;
+}
+
+.cm-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--text-primary, #111);
+  margin: 0 0 0.5rem;
+}
+
+.cm-required { color: var(--danger, #ef4444); }
+
+/* ── Reasons ── */
+.cm-reasons {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cm-reason {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.7rem 0.9rem;
+  border: 1.5px solid var(--border, #e0e0e0);
+  border-radius: 0.65rem;
+  background: var(--bg-card, #fff);
+  font-size: 0.88rem;
+  color: var(--text-primary, #111);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, background 0.15s;
+}
+
+.cm-reason:hover { border-color: var(--accent, #1976d2); }
+
+.cm-reason--active {
+  border-color: var(--accent, #1976d2);
+  background: var(--accent-soft, #f0f7ff);
+}
+
+.cm-reason-radio {
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  border: 2px solid var(--border, #ccc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: border-color 0.15s;
+}
+
+.cm-reason--active .cm-reason-radio { border-color: var(--accent, #1976d2); }
+
+.cm-reason-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent, #1976d2);
+}
+
+/* ── Textarea ── */
+.cm-textarea {
+  width: 100%;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid var(--border, #e0e0e0);
+  border-radius: 0.65rem;
+  font-size: 0.88rem;
+  color: var(--text-primary, #111);
+  background: var(--bg-card, #fff);
+  resize: vertical;
+  min-height: 72px;
+  box-sizing: border-box;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+
+.cm-textarea:focus {
+  outline: none;
+  border-color: var(--accent, #1976d2);
+}
+
+.cm-char-count {
+  font-size: 0.75rem;
+  color: var(--text-secondary, #aaa);
+  text-align: right;
+  margin: 0.25rem 0 0;
+}
+
+/* ── Confirm step ── */
+.cm-confirm-icon {
+  font-size: 2.5rem;
+  text-align: center;
+  margin-bottom: 0.5rem;
+}
+
+.cm-confirm-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  text-align: center;
+  color: var(--text-primary, #111);
+  margin: 0 0 0.4rem;
+}
+
+.cm-confirm-sub {
+  font-size: 0.85rem;
+  text-align: center;
+  color: var(--text-secondary, #888);
+  margin: 0 0 1rem;
+  line-height: 1.5;
+}
+
+.cm-confirm-box {
+  background: var(--bg-base, #f8f8f8);
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 0.85rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cm-confirm-row {
+  display: flex;
+  gap: 0.75rem;
+  font-size: 0.85rem;
+}
+
+.cm-confirm-label {
+  color: var(--text-secondary, #888);
+  flex-shrink: 0;
+  width: 56px;
+}
+
+.cm-confirm-value {
+  color: var(--text-primary, #111);
+  font-weight: 500;
+}
+
+/* ── Refund box ── */
+.cm-refund-box {
+  background: #f0fdf4;
+  border: 1.5px solid #bbf7d0;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+}
+
+.cm-refund-header {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-bottom: 0.65rem;
+}
+
+.cm-refund-icon { font-size: 1rem; }
+
+.cm-refund-title {
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: #15803d;
+}
+
+.cm-refund-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cm-refund-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: #166534;
+}
+
+.cm-refund-amount {
+  font-size: 0.95rem;
+  color: #15803d;
+}
+
+.cm-refund-note {
+  font-size: 0.75rem;
+  color: #4ade80;
+  margin: 0.5rem 0 0;
+}
+
+.cm-no-refund-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--bg-base, #f8f8f8);
+  border-radius: 0.75rem;
+  padding: 0.75rem 1rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
+}
+
+/* ── Footer ── */
+.cm-footer {
+  display: flex;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem 1.25rem;
+  border-top: 1px solid var(--border, #f0f0f0);
+  flex-shrink: 0;
+}
+
+.cm-btn {
+  flex: 1;
+  padding: 0.75rem 1rem;
+  border-radius: 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: opacity 0.15s, background 0.15s;
+}
+
+.cm-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.cm-btn--ghost {
+  background: var(--bg-base, #f0f0f0);
+  color: var(--text-primary, #333);
+}
+
+.cm-btn--ghost:hover:not(:disabled) { background: var(--border, #e0e0e0); }
+
+.cm-btn--primary {
+  background: var(--accent, #1976d2);
+  color: #fff;
+}
+
+.cm-btn--primary:hover:not(:disabled) { opacity: 0.88; }
+
+.cm-btn--danger {
+  background: var(--danger, #ef4444);
+  color: #fff;
+}
+
+.cm-btn--danger:hover:not(:disabled) { opacity: 0.88; }

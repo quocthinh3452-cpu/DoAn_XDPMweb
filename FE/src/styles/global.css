@@ -1,0 +1,34 @@
+/* ═══════════════════════════════════════════════════════════
+   GLOBAL — Entry point
+   Import order matters: tokens → theme → keyframes → utilities → buttons
+═══════════════════════════════════════════════════════════ */
+@import "./tokens.css";
+@import "tailwindcss";
+@import "./light-mode.css";
+@import "./keyframes.css";
+@import "./utilities.css";
+@import "./buttons.css";
+@import './forms.css';
+/* ── Base reset ── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html  { scroll-behavior: smooth; }
+body  {
+  background: var(--color-bg);
+  color: var(--color-text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+a   { color: inherit; text-decoration: none; }
+img { max-width: 100%; display: block; }
+button { cursor: pointer; font-family: inherit; border: none; }
+input, select, textarea { font-family: inherit; }
+h1,h2,h3,h4,h5 { font-family: var(--font-display); line-height: 1.15; letter-spacing: -0.02em; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar        { width: 5px; }
+::-webkit-scrollbar-track  { background: transparent; }
+::-webkit-scrollbar-thumb  { background: var(--color-border2); border-radius: 99px; }
+::-webkit-scrollbar-thumb:hover { background: var(--color-muted); }
