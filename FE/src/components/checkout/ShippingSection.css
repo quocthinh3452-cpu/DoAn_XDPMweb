@@ -1,0 +1,208 @@
+/* ── ShippingSection locked state ─────────────────────────────────────────── */
+/* Thêm vào cuối CartCheckoutPage.css */
+
+.cc-ship-card {
+  transition: opacity 0.2s ease;
+}
+
+/* Card mờ nhưng vẫn hiện layout */
+.cc-ship-card--locked {
+  opacity: 0.6;
+}
+
+/* Hint khi locked */
+.cc-ship-locked-hint {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
+  background: var(--bg-base, #f8f8f8);
+  border-radius: 0.5rem;
+  padding: 0.6rem 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.cc-ship-lock-icon {
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* Body bị dim + no pointer events khi locked */
+.cc-ship-body {
+  transition: opacity 0.2s ease;
+}
+
+.cc-ship-body--dim {
+  opacity: 0.45;
+  user-select: none;
+}
+
+/* ── Placeholder cards ───────────────────────────────────────────────────── */
+.cc-ship-option--placeholder {
+  cursor: default;
+  pointer-events: none;
+}
+
+.cc-ship-placeholder-bar {
+  display: block;
+  border-radius: 4px;
+  background: var(--border, #e0e0e0);
+  animation: cc-shimmer 1.4s ease-in-out infinite;
+}
+
+.cc-ship-placeholder-bar--name {
+  width: 120px;
+  height: 14px;
+  margin-bottom: 6px;
+}
+
+.cc-ship-placeholder-bar--desc {
+  width: 180px;
+  height: 12px;
+}
+
+@keyframes cc-shimmer {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.4; }
+}
+
+/* ── Ship option button ──────────────────────────────────────────────────── */
+.cc-ship-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.cc-ship-option {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border: 1.5px solid var(--border, #e0e0e0);
+  border-radius: 0.75rem;
+  background: var(--bg-card, #fff);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.cc-ship-option:hover {
+  border-color: var(--accent, #1976d2);
+}
+
+.cc-ship-option--active {
+  border-color: var(--accent, #1976d2);
+  box-shadow: 0 0 0 3px var(--accent-soft, #e8f4ff);
+  background: var(--accent-soft, #f0f7ff);
+}
+
+/* Radio circle */
+.cc-ship-radio {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid var(--border, #ccc);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: border-color 0.15s;
+}
+
+.cc-ship-option--active .cc-ship-radio {
+  border-color: var(--accent, #1976d2);
+}
+
+.cc-ship-radio-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  background: var(--accent, #1976d2);
+}
+
+/* Info */
+.cc-ship-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.cc-ship-name {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary, #111);
+}
+
+.cc-ship-desc {
+  font-size: 0.8rem;
+  color: var(--text-secondary, #888);
+}
+
+/* Fee row */
+.cc-ship-fee-row {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.25rem;
+  flex-wrap: wrap;
+}
+
+.cc-ship-fee {
+  font-weight: 600;
+  font-size: 0.9rem;
+  color: var(--text-primary, #111);
+}
+
+.cc-ship-fee--free {
+  color: var(--success, #2e7d32);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.cc-ship-fee-loading {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #888);
+}
+
+.cc-ship-eta {
+  font-size: 0.82rem;
+  color: var(--text-secondary, #888);
+}
+
+/* Misc */
+.cc-ship-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
+  padding: 0.5rem 0;
+}
+
+.cc-spinner-sm {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid var(--border, #e0e0e0);
+  border-top-color: var(--accent, #1976d2);
+  border-radius: 50%;
+  animation: cc-spin-sm 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes cc-spin-sm { to { transform: rotate(360deg); } }
+
+.cc-ship-err {
+  font-size: 0.83rem;
+  color: var(--danger, #e53935);
+  margin-top: 0.25rem;
+}
+
+.cc-ship-hint {
+  font-size: 0.85rem;
+  color: var(--text-secondary, #888);
+}

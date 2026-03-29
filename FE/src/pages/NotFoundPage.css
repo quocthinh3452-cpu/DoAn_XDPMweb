@@ -1,0 +1,134 @@
+/* ─── Animations ──────────────────────────────────────────── */
+@keyframes glitch-clip-1 {
+  0%,100% { opacity: 0; clip-path: polygon(0 0, 0 0, 0 0, 0 0); }
+  8%      { opacity: 1; clip-path: polygon(0 12%, 100% 12%, 100% 28%, 0 28%); transform: translate(-4px, 0); }
+  10%     { opacity: 0; }
+  42%     { opacity: 1; clip-path: polygon(0 55%, 100% 55%, 100% 65%, 0 65%); transform: translate(4px, 0); }
+  44%     { opacity: 0; }
+  72%     { opacity: 1; clip-path: polygon(0 38%, 100% 38%, 100% 48%, 0 48%); transform: translate(-3px, 2px); }
+  74%     { opacity: 0; }
+}
+@keyframes glitch-clip-2 {
+  0%,100% { opacity: 0; clip-path: polygon(0 0, 0 0, 0 0, 0 0); }
+  20%     { opacity: 1; clip-path: polygon(0 62%, 100% 62%, 100% 72%, 0 72%); transform: translate(5px, 0); }
+  22%     { opacity: 0; }
+  56%     { opacity: 1; clip-path: polygon(0 18%, 100% 18%, 100% 30%, 0 30%); transform: translate(-5px, -2px); }
+  58%     { opacity: 0; }
+  88%     { opacity: 1; clip-path: polygon(0 80%, 100% 80%, 100% 92%, 0 92%); transform: translate(3px, 0); }
+  90%     { opacity: 0; }
+}
+@keyframes scanline {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+@keyframes flicker {
+  0%,100% { opacity: 1; }
+  92%     { opacity: 1; }
+  93%     { opacity: .85; }
+  94%     { opacity: 1; }
+  96%     { opacity: .9; }
+  97%     { opacity: 1; }
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes orb-drift {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  33%     { transform: translate(30px, -20px) scale(1.08); }
+  66%     { transform: translate(-20px, 25px) scale(.94); }
+}
+@keyframes orb-drift-2 {
+  0%,100% { transform: translate(0, 0) scale(1); }
+  40%     { transform: translate(-35px, 15px) scale(1.1); }
+  75%     { transform: translate(25px, -30px) scale(.92); }
+}
+@keyframes noise-pulse {
+  0%,100% { opacity: .035; }
+  50%     { opacity: .06; }
+}
+@keyframes countdown-shrink {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+/* ─── Animation utility classes ───────────────────────────── */
+.nf-glitch-1  { animation: glitch-clip-1 4s infinite; }
+.nf-glitch-2  { animation: glitch-clip-2 4s infinite .15s; }
+.nf-flicker   { animation: flicker 6s infinite; }
+.nf-fu1       { animation: fadeUp .55s ease both .10s; }
+.nf-fu2       { animation: fadeUp .55s ease both .22s; }
+.nf-fu3       { animation: fadeUp .55s ease both .34s; }
+.nf-fu4       { animation: fadeUp .55s ease both .50s; }
+.nf-orb1      { animation: orb-drift    14s ease-in-out infinite; }
+.nf-orb2      { animation: orb-drift-2  18s ease-in-out infinite; }
+.nf-noise     { animation: noise-pulse  4s  ease-in-out infinite; }
+
+/* ─── Scanline effect ─────────────────────────────────────── */
+.nf-scanline-fx::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(transparent 50%, rgba(0,0,0,.04) 50%);
+  background-size: 100% 4px;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* ─── Buttons ─────────────────────────────────────────────── */
+.nf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 40px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: transform .15s, box-shadow .15s, background .15s, border-color .15s, color .15s;
+  border: 1.5px solid transparent;
+  line-height: 1;
+}
+.nf-btn:active { transform: scale(.97) !important; }
+
+.nf-btn-primary {
+  background: var(--color-accent, #6c63ff);
+  color: #fff;
+  box-shadow: 0 2px 18px rgba(108,99,255,.3);
+}
+.nf-btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 28px rgba(108,99,255,.48);
+  filter: brightness(1.1);
+}
+
+.nf-btn-ghost {
+  background: transparent;
+  color: var(--color-text-muted, rgba(255,255,255,.55));
+  border-color: rgba(255,255,255,.12);
+}
+.nf-btn-ghost:hover {
+  background: rgba(255,255,255,.06);
+  border-color: rgba(255,255,255,.28);
+  color: var(--color-text);
+  transform: translateY(-1px);
+}
+
+/* ─── Countdown bar ───────────────────────────────────────── */
+.nf-countdown-track {
+  width: 100%;
+  height: 3px;
+  background: rgba(255,255,255,.1);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.nf-countdown-bar {
+  height: 100%;
+  background: var(--color-accent, #6c63ff);
+  border-radius: 99px;
+  animation: countdown-shrink linear forwards;
+}
