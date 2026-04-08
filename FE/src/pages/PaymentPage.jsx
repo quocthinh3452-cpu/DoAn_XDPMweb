@@ -4,6 +4,7 @@
  *
  * Hiện QR thanh toán cho VietQR / MoMo / ZaloPay.
  * Poll status mỗi 3 giây → navigate /order-success khi paid.
+ * Không có nút "Tôi đã thanh toán" — chỉ dùng polling thật.
  */
 
 import { useEffect, useState } from "react";
@@ -16,13 +17,19 @@ import {
   createMoMoPayment,
   createZaloPayPayment,
 } from "../services/paymentService";
-
+import { formatPrice } from "../utils/helpers";
 import "./PaymentPage.css";
 
 const METHOD_LABEL = {
-  vietqr: "VietQR / Chuyển khoản",
-  momo:   "MoMo",
+  vietqr:  "VietQR / Chuyển khoản",
+  momo:    "MoMo",
   zalopay: "ZaloPay",
+};
+
+const METHOD_GUIDE = {
+  vietqr:  "Mở app ngân hàng → Quét mã QR → Nhập đúng số tiền và nội dung chuyển khoản.",
+  momo:    "Mở app MoMo → Quét mã QR → Xác nhận thanh toán.",
+  zalopay: "Mở app ZaloPay → Quét mã QR → Xác nhận thanh toán.",
 };
 
 export default function PaymentPage() {
@@ -39,17 +46,15 @@ export default function PaymentPage() {
   const amount = currentOrder?.total ?? 0;
   const bank   = getBankInfo();
 
-  // ── Generate QR khi mount ─────────────────────────────────────────────────
+  // ── Generate QR ───────────────────────────────────────────────────────────
   useEffect(() => {
     if (!currentOrder) return;
-
     const generate = async () => {
       setLoading(true);
       setError(null);
       try {
         if (method === "vietqr") {
-          const url = buildVietQRUrl({ orderId, amount, description: `Thanh toan ${orderId}` });
-          setQrUrl(url);
+          setQrUrl(buildVietQRUrl({ orderId, amount, description: `Thanh toan ${orderId}` }));
         } else if (method === "momo") {
           const res = await createMoMoPayment({ orderId, amount });
           setQrUrl(res.qrUrl);
@@ -63,11 +68,10 @@ export default function PaymentPage() {
         setLoading(false);
       }
     };
-
     generate();
   }, [orderId]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // ── Poll payment status ───────────────────────────────────────────────────
+  // ── Poll status ───────────────────────────────────────────────────────────
   usePaymentPolling({
     orderId,
     enabled: !!currentOrder && !expired,
@@ -75,13 +79,11 @@ export default function PaymentPage() {
       updateOrderStatus("paid");
       navigate("/order-success");
     },
-    onFailed: () => {
-      setError("Thanh toán thất bại. Vui lòng thử lại.");
-    },
+    onFailed: () => setError("Thanh toán thất bại. Vui lòng thử lại."),
     onExpired: () => setExpired(true),
   });
 
-  // ── Guard: không có order → về trang chủ ─────────────────────────────────
+  // Guard
   if (!currentOrder) {
     return (
       <div className="pay-page">
@@ -96,14 +98,14 @@ export default function PaymentPage() {
   return (
     <div className="pay-page">
       <div className="pay-card">
-        {/* ── Header ── */}
+        {/* Header */}
         <div className="pay-header">
           <div className="pay-method-badge">{METHOD_LABEL[method] ?? method}</div>
           <h1 className="pay-title">Quét mã để thanh toán</h1>
           <p className="pay-order-id">Mã đơn: <strong>{orderId}</strong></p>
         </div>
 
-        {/* ── QR ── */}
+        {/* QR */}
         <div className="pay-qr-wrap">
           {loading && <div className="pay-spinner" />}
           {!loading && error && <p className="pay-err">{error}</p>}
@@ -112,7 +114,12 @@ export default function PaymentPage() {
           )}
         </div>
 
-        {/* ── Bank info (chỉ VietQR) ── */}
+        {/* Hướng dẫn */}
+        {!expired && !error && (
+          <p className="pay-guide">{METHOD_GUIDE[method]}</p>
+        )}
+
+        {/* Bank info — chỉ VietQR */}
         {method === "vietqr" && (
           <div className="pay-bank-info">
             <div className="pay-bank-row">
@@ -129,9 +136,7 @@ export default function PaymentPage() {
             </div>
             <div className="pay-bank-row">
               <span className="pay-bank-label">Số tiền</span>
-              <strong className="pay-bank-value pay-bank-amount">
-                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount)}
-              </strong>
+              <strong className="pay-bank-value pay-bank-amount">{formatPrice(amount)}</strong>
             </div>
             <div className="pay-bank-row">
               <span className="pay-bank-label">Nội dung CK</span>
@@ -140,7 +145,7 @@ export default function PaymentPage() {
           </div>
         )}
 
-        {/* ── Polling status ── */}
+        {/* Polling indicator */}
         {!expired && !error && (
           <div className="pay-polling">
             <span className="pay-pulse" />
@@ -148,24 +153,14 @@ export default function PaymentPage() {
           </div>
         )}
 
-        {/* ── Expired ── */}
+        {/* Expired */}
         {expired && (
           <div className="pay-expired">
-            <p>Phiên thanh toán đã hết hạn.</p>
+            <p>Phiên thanh toán đã hết hạn (3 phút).</p>
             <button className="pay-btn" onClick={() => navigate("/cart")}>
               Quay lại giỏ hàng
             </button>
           </div>
-        )}
-
-        {/* ── Đã thanh toán rồi (manual confirm tạm) ── */}
-        {!expired && !error && (
-          <button
-            className="pay-btn pay-btn--outline"
-            onClick={() => { updateOrderStatus("paid"); navigate("/order-success"); }}
-          >
-            Tôi đã thanh toán
-          </button>
         )}
 
         <button className="pay-btn-link" onClick={() => navigate("/cart")}>

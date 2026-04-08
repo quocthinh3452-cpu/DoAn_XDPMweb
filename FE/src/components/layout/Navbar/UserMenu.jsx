@@ -44,11 +44,11 @@ function getGradient(name = "") {
 }
 
 /* ─── Menu items config ─────────────────────────────────────────────── */
-const MENU_ITEMS = [
+const BASE_MENU_ITEMS = [
   { to: "/profile", label: "Trang cá nhân", Icon: IconUser   },
   { to: "/orders",  label: "Đơn hàng",      Icon: IconBox    },
-  { to: "/admin",   label: "Admin",          Icon: IconShield, accent: true },
 ];
+const ADMIN_MENU_ITEM = { to: "/admin", label: "Admin", Icon: IconShield, accent: true };
 
 /* ─── CSS (inject một lần) ──────────────────────────────────────────── */
 const STYLE_ID = "user-menu-styles";
@@ -166,7 +166,7 @@ function injectStyles() {
 export function UserMenu() {
   const navigate  = useNavigate();
   const location  = useLocation();
-  const { user, logout } = useUser();
+  const { user, logout, isAdmin } = useUser();
   const { success }      = useToast();
 
   const [open, setOpen]    = useState(false);
@@ -195,6 +195,7 @@ export function UserMenu() {
 
   const [g1, g2] = getGradient(user?.name);
   const initial  = (user?.name || "U").charAt(0).toUpperCase();
+  const menuItems = isAdmin ? [...BASE_MENU_ITEMS, ADMIN_MENU_ITEM] : BASE_MENU_ITEMS;
 
   return (
     <div
@@ -256,7 +257,7 @@ export function UserMenu() {
 
           {/* Menu items */}
           <div className="py-0.5">
-            {MENU_ITEMS.map(({ to, label, Icon, accent }) => {
+            {menuItems.map(({ to, label, Icon, accent }) => {
               const isActive = location.pathname.startsWith(to);
               return (
                 <Link

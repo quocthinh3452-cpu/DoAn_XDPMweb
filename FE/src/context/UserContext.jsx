@@ -17,7 +17,15 @@ export function UserProvider({ children }) {
       const storedUser  = localStorage.getItem(USER_KEY);
       const storedToken = localStorage.getItem(TOKEN_KEY);
       if (storedUser && storedToken) {
-        setUser(JSON.parse(storedUser));
+        const parsed = JSON.parse(storedUser);
+        const withRole = { role: "user", ...parsed };
+        if (withRole.role !== "admin" && withRole.role !== "user") {
+          withRole.role = "user";
+        }
+        if (JSON.stringify(parsed) !== JSON.stringify(withRole)) {
+          localStorage.setItem(USER_KEY, JSON.stringify(withRole));
+        }
+        setUser(withRole);
         setToken(storedToken);
       }
     } catch (_) {}
@@ -62,9 +70,10 @@ export function UserProvider({ children }) {
   }
 
   const isLoggedIn = !!user;
+  const isAdmin    = user?.role === "admin";
 
   return (
-    <UserContext.Provider value={{ user, token, isLoggedIn, loading, login, register, logout, updateUser }}>
+    <UserContext.Provider value={{ user, token, isLoggedIn, isAdmin, loading, login, register, logout, updateUser }}>
       {children}
     </UserContext.Provider>
   );

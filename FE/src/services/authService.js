@@ -16,16 +16,30 @@
 
 import { simulateDelay } from "./apiClient";
 
+/** @typedef {"user" | "admin"} UserRole */
+
 // ── Mock user database ───────────────────────────────────────
+// Production: role comes from DB / Laravel (register → user only; admin via seed/console)
 const MOCK_USERS = [
   {
     id: 1,
     name: "Nguyen Van A",
     email: "demo@techstore.com",
     password: "demo123",
+    role: "user",
     phone: "0901234567",
     address: "123 Nguyen Hue",
     city: "Ho Chi Minh City",
+  },
+  {
+    id: 2,
+    name: "Admin TechStore",
+    email: "admin@techstore.com",
+    password: "admin123",
+    role: "admin",
+    phone: "",
+    address: "",
+    city: "",
   },
 ];
 
@@ -63,12 +77,13 @@ export async function register({ name, email, password }) {
     id: Date.now(),
     name,
     email,
+    role: "user",
     phone: "",
     address: "",
     city: "",
   };
 
-  // In production: Laravel creates the DB record and returns the user
+  // In production: Laravel creates the DB record with role=user and returns the user
   MOCK_USERS.push({ ...newUser, password });
   const token = generateToken();
 
