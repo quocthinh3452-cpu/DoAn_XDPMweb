@@ -247,7 +247,7 @@ function LoginRegisterView({
     <>
       {/* Demo hint */}
       <div className="auth-demo">
-        <strong>Demo:</strong> demo@techstore.com / demo123
+        <strong>Demo:</strong> demo@techstore.com / demo123 <br/>
         <strong>Admin Demo:</strong> admin@techstore.com / admin123
       </div>
 
