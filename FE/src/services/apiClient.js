@@ -1,26 +1,43 @@
-// ============================================================
-// API CLIENT — Base configuration
-// ============================================================
-// When Laravel backend is ready:
-//   1. Set BASE_URL to your Laravel API URL (e.g. http://localhost:8000/api)
-//   2. Replace simulateDelay with real fetch() calls in each service
-//   3. Add auth headers (Bearer token from Sanctum/Passport) here
-// ============================================================
+import axios from 'axios';
 
-export const BASE_URL = "/api"; // Future: "http://localhost:8000/api"
+// ==========================================
+// HÀM GIẢ LẬP DELAY (Khôi phục lại cho các service cũ)
+// ==========================================
+export const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Simulates network latency. Remove when using real API.
-export const simulateDelay = (ms = 400) =>
-  new Promise((resolve) => setTimeout(resolve, ms));
+// ==========================================
+// CẤU HÌNH AXIOS GỌI BACKEND
+// ==========================================
+const apiClient = axios.create({
+  baseURL: 'http://localhost:8000/api', // Trỏ vào backend Laravel
+  headers: {
+    'Accept': 'application/json',
+  },
+});
 
-// Future: real HTTP client wrapper
-// export async function apiGet(endpoint) {
-//   const res = await fetch(`${BASE_URL}${endpoint}`, {
-//     headers: {
-//       "Content-Type": "application/json",
-//       Authorization: `Bearer ${localStorage.getItem("token")}`,
-//     },
-//   });
-//   if (!res.ok) throw new Error(`HTTP ${res.status}`);
-//   return res.json();
-// }
+apiClient.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  },
+  (error) => Promise.reject(error)
+);
+
+apiClient.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response && error.response.status === 401) {
+      // 401 Unauthorized: Xóa token nếu hết hạn
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('user_role');
+      // window.location.href = '/login'; 
+    }
+    return Promise.reject(error);
+  }
+);
+
+// Bắt buộc phải có dòng này ở cuối
+export default apiClient;

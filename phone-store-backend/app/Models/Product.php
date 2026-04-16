@@ -24,14 +24,12 @@ class Product extends Model
     ];
 
     // Thiết lập mối quan hệ với Ảnh sản phẩm
-    public function images()
-    {
-        return $this->hasMany(ProductImage::class);
+   public function primaryImage() {
+        return $this->hasOne(ProductImage::class, 'product_id')->where('is_primary', 1);
     }
 
     // Thiết lập mối quan hệ với Danh mục
-    public function category()
-    {
-        return $this->belongsTo(Category::class);
-    }
+  public function category() {
+    return $this->belongsTo(Category::class, 'category_id');
+}
 }
