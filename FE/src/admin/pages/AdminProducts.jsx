@@ -1,16 +1,16 @@
+// File: src/admin/pages/AdminProducts.jsx
 import { useState, useEffect, useCallback } from "react";
-import { getAdminProducts, createProduct, updateProduct, deleteProduct } from "../services/adminService";
+import { adminService } from "../services/adminService"; // Đảm bảo import đúng service
 import { useToast } from "../../context/ToastContext";
 import { formatPrice, calcDiscount } from "../../utils/helpers";
 import { PageHeader, SearchBar, FilterSelect, AdminTable, Pagination, ConfirmDialog, MetricRow, useDebounce, Spinner } from "../components/ui/AdminUI";
 
+// ĐÃ SỬA: Đồng bộ danh mục với Database (tiếng Việt)
 const CAT_OPTIONS = [
-  { value: "all",        label: "All Categories" },
-  { value: "smartphone", label: "Smartphones"    },
-  { value: "laptop",     label: "Laptops"        },
-  { value: "tablet",     label: "Tablets"        },
-  { value: "audio",      label: "Audio"          },
-  { value: "wearable",   label: "Wearables"      },
+  { value: "all",        label: "Tất cả danh mục" },
+  { value: "dien-thoai", label: "Điện thoại" },
+  { value: "laptop",     label: "Laptop" },
+  { value: "phu-kien",   label: "Phụ kiện" },
 ];
 
 const STOCK_OPTIONS = [
@@ -20,20 +20,19 @@ const STOCK_OPTIONS = [
   { value: "ok",  label: "In Stock"   },
 ];
 
-const EMPTY_FORM = { name:"", brand:"", category:"smartphone", price:"", originalPrice:"", stock:"", description:"", image:"" };
+const EMPTY_FORM = { name:"", brand:"", category:"dien-thoai", price:"", originalPrice:"", stock:"", description:"", imagePreview: null, imageFile: null };
 
 const inputCls = "w-full px-4 py-3 bg-surface2 border border-border rounded-xl text-text text-sm outline-none focus:border-accent focus:shadow-[0_0_0_3px_rgba(124,111,247,0.12)] transition-all placeholder:text-muted/40 font-medium";
 
+// ĐÃ SỬA: Đồng bộ style danh mục
 const CAT_STYLE = {
-  smartphone: "bg-accent/10 text-[var(--color-accent-hl)] border-accent/20",
-  laptop:     "bg-purple-400/10 text-purple-300 border-purple-400/20",
-  tablet:     "bg-blue-400/10 text-blue-300 border-blue-400/20",
-  audio:      "bg-pink-400/10 text-pink-300 border-pink-400/20",
-  wearable:   "bg-teal-400/10 text-teal-300 border-teal-400/20",
+  "dien-thoai": "bg-accent/10 text-[var(--color-accent-hl)] border-accent/20",
+  "laptop":     "bg-purple-400/10 text-purple-300 border-purple-400/20",
+  "phu-kien":   "bg-blue-400/10 text-blue-300 border-blue-400/20",
 };
 
 function CatBadge({ cat }) {
-  const label = CAT_OPTIONS.find((o) => o.value === cat)?.label?.replace("All Categories","") ?? cat;
+  const label = CAT_OPTIONS.find((o) => o.value === cat)?.label?.replace("Tất cả danh mục","") ?? cat;
   return (
     <span className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${CAT_STYLE[cat] ?? "bg-surface3 text-muted border-border"}`}>
       {label}
@@ -78,7 +77,6 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
     { k: "price",         label: "Sale Price ($)",     ph: "999", type:"number", span: 1, req: true  },
     { k: "originalPrice", label: "Original Price ($)", ph: "1099",type:"number", span: 1            },
     { k: "stock",         label: "Stock Qty",          ph: "20",  type:"number", span: 1            },
-    { k: "image",         label: "Image URL",          ph: "https://…",          span: 2            },
     { k: "description",   label: "Description",        ph: "Short description…", span: 2, ta: true  },
   ];
 
@@ -88,7 +86,6 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
       <div className="bg-surface border border-border rounded-2xl w-full max-w-[660px] max-h-[92vh] flex flex-col shadow-[0_20px_80px_rgba(0,0,0,0.6)]"
         style={{ animation: "slideUp 200ms cubic-bezier(0.16,1,0.3,1)" }} onClick={(e) => e.stopPropagation()}>
 
-        {/* Header */}
         <div className="flex items-center justify-between px-7 py-5 border-b border-border shrink-0">
           <div>
             <h2 className="font-display text-xl font-extrabold">{modal === "create" ? "Add New Product" : "Edit Product"}</h2>
@@ -102,13 +99,11 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 overflow-y-auto p-7">
-          {/* Image preview */}
-          {form.image && (
+          {form.imagePreview && (
             <div className="flex justify-center mb-6">
               <div className="relative">
-                <img src={form.image} alt="preview"
+                <img src={form.imagePreview} alt="preview"
                   className="h-28 w-28 object-cover rounded-2xl border-2 border-border shadow-lg"
                   onError={(e) => { e.target.style.display = "none"; }} />
                 <div className="absolute inset-0 rounded-2xl bg-gradient-to-t from-black/20 to-transparent pointer-events-none" />
@@ -117,6 +112,24 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
           )}
 
           <div className="grid grid-cols-2 gap-5">
+            <div className="col-span-2 flex flex-col gap-2">
+              <label className="text-xs font-bold uppercase tracking-[0.5px] text-muted">
+                Product Image
+              </label>
+              <input 
+                type="file" 
+                accept="image/jpeg, image/png, image/webp"
+                onChange={(e) => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    set("imageFile", file);
+                    set("imagePreview", URL.createObjectURL(file)); 
+                  }
+                }} 
+                className="text-sm file:mr-4 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-sm file:font-bold file:bg-accent/10 file:text-accent hover:file:bg-accent/20 cursor-pointer"
+              />
+            </div>
+
             {FIELDS.map(({ k, label, ph, type, span, req, ta }) => (
               <div key={k} className={`flex flex-col gap-2 ${span === 2 ? "col-span-2" : ""}`}>
                 <label className="text-xs font-bold uppercase tracking-[0.5px] text-muted">
@@ -129,7 +142,6 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
               </div>
             ))}
 
-            {/* Category select */}
             <div className="flex flex-col gap-2">
               <label className="text-xs font-bold uppercase tracking-[0.5px] text-muted">
                 Category<span className="text-red ml-0.5">*</span>
@@ -144,7 +156,6 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
               </select>
             </div>
 
-            {/* Discount preview */}
             {discountPct !== null && (
               <div className="col-span-2 flex items-center gap-4 px-5 py-4 bg-green/5 border border-green/20 rounded-xl">
                 <span className="text-xs font-display font-bold text-muted">Discount preview</span>
@@ -157,7 +168,6 @@ function ProductModal({ modal, form, onChange, saving, onSave, onClose }) {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-3 px-7 py-5 border-t border-border shrink-0 bg-surface2/50">
           <button onClick={onClose}
             className="px-5 py-2.5 bg-surface border border-border text-text rounded-xl font-display font-bold text-sm hover:border-border2 transition-all">
@@ -199,7 +209,7 @@ export default function AdminProducts() {
   const load = useCallback(async () => {
     setLoading(true);
     try {
-      const res = await getAdminProducts({ search, category, page, sortKey, sortDir, stockFilter });
+      const res = await adminService.getProducts({ search, category, page, sortKey, sortDir, stockFilter });
       setProducts(res.data); setTotal(res.total); setTotalPages(res.totalPages);
     } catch (e) { error("Load failed", e.message); }
     finally { setLoading(false); }
@@ -214,8 +224,14 @@ export default function AdminProducts() {
   };
 
   const openCreate = () => { setForm(EMPTY_FORM); setEditing(null); setModal("create"); };
+  
   const openEdit   = (p) => {
-    setForm({ name:p.name, brand:p.brand, category:p.category, price:p.price, originalPrice:p.originalPrice, stock:p.stock, description:p.description||"", image:p.image });
+    setForm({ 
+      name:p.name, brand:p.brand, category:p.category?.slug || "dien-thoai", 
+      price:p.sale_price || p.regular_price, originalPrice:p.regular_price, 
+      stock:p.stock_quantity, description:p.description||"", 
+      imagePreview: p.image || null, imageFile: null 
+    });
     setEditing(p); setModal("edit");
   };
 
@@ -223,9 +239,26 @@ export default function AdminProducts() {
     if (!form.name.trim() || !form.price) { error("Validation", "Name and price are required."); return; }
     setSaving(true);
     try {
-      const payload = { ...form, price: Number(form.price), originalPrice: Number(form.originalPrice)||Number(form.price), stock: Number(form.stock)||0 };
-      if (modal === "create") { await createProduct(payload); success("Created", form.name); }
-      else                    { await updateProduct(editing.id, payload); success("Updated", form.name); }
+      const formData = new FormData();
+      formData.append('name', form.name);
+      formData.append('brand', form.brand || '');
+      formData.append('category', form.category);
+      formData.append('originalPrice', Number(form.originalPrice) || Number(form.price));
+      formData.append('price', Number(form.price));
+      formData.append('stock', Number(form.stock) || 0);
+      formData.append('description', form.description || '');
+      
+      if (form.imageFile) {
+        formData.append('image', form.imageFile);
+      }
+
+      if (modal === "create") { 
+        await adminService.createProduct(formData); 
+        success("Created", form.name); 
+      } else { 
+        await adminService.updateProduct(editing.id, formData); 
+        success("Updated", form.name); 
+      }
       setModal(null); load();
     } catch (e) { error("Save failed", e.message); }
     finally { setSaving(false); }
@@ -234,14 +267,16 @@ export default function AdminProducts() {
   const handleDelete = async () => {
     if (!confirmDel) return;
     setDeleting(true);
-    try { await deleteProduct(confirmDel.id); success("Deleted", confirmDel.name); setConfirmDel(null); load(); }
+    try { await adminService.deleteProduct(confirmDel.id); success("Deleted", confirmDel.name); setConfirmDel(null); load(); }
     catch (e) { error("Delete failed", e.message); }
     finally { setDeleting(false); }
   };
 
-  const outOfStock = products.filter((p) => p.stock === 0).length;
-  const lowStock   = products.filter((p) => p.stock > 0 && p.stock < 5).length;
-  const avgPrice   = products.length ? Math.round(products.reduce((s, p) => s + p.price, 0) / products.length) : 0;
+  const outOfStock = products.filter((p) => p.stock_quantity === 0).length;
+  const lowStock   = products.filter((p) => p.stock_quantity > 0 && p.stock_quantity < 5).length;
+  
+  // ĐÃ SỬA: Ép kiểu Number để khắc phục lỗi $NaN
+  const avgPrice   = products.length ? Math.round(products.reduce((s, p) => s + (Number(p.sale_price) || Number(p.regular_price)), 0) / products.length) : 0;
 
   const columns = [
     { key:"image",    label:"",        width:"72px" },
@@ -253,35 +288,38 @@ export default function AdminProducts() {
 
   const renderCell = (col, row) => {
     switch (col.key) {
+      // ĐÃ SỬA: Thay đổi placeholder image
       case "image": return (
-        <img src={row.image} alt={row.name}
-          className="w-12 h-12 object-cover rounded-xl border border-border shadow-sm" />
+        <img src={row.image || 'https://placehold.co/150x150/f8fafc/a4b1cd?text=No+Image'} alt={row.name}
+          className="w-12 h-12 object-cover rounded-xl border border-border shadow-sm bg-white" />
       );
       case "name": return (
         <div>
           <p className="text-sm font-semibold">{row.name}</p>
           <div className="flex items-center gap-2 mt-1">
-            <span className="text-xs text-muted font-medium">{row.brand}</span>
+            <span className="text-xs text-muted font-medium">SKU: {row.sku}</span>
             <span className="text-muted/30">·</span>
-            <CatBadge cat={row.category} />
+            <CatBadge cat={row.category?.slug || "none"} />
           </div>
         </div>
       );
       case "price": {
-        const disc = row.originalPrice > 0 ? calcDiscount(row.originalPrice, row.price) : 0;
+        const pPrice = row.sale_price || row.regular_price;
+        const oPrice = row.regular_price;
+        const disc = oPrice > pPrice ? calcDiscount(oPrice, pPrice) : 0;
         return (
           <div>
-            <p className="font-display font-bold text-sm tabular-nums">{formatPrice(row.price)}</p>
+            <p className="font-display font-bold text-sm tabular-nums">{formatPrice(pPrice)}</p>
             {disc > 0 && (
               <div className="flex items-center gap-1.5 mt-0.5">
-                <span className="text-xs text-muted line-through tabular-nums">{formatPrice(row.originalPrice)}</span>
+                <span className="text-xs text-muted line-through tabular-nums">{formatPrice(oPrice)}</span>
                 <span className="text-[10px] font-bold text-green bg-green/10 px-1.5 py-0.5 rounded-full border border-green/20">-{disc}%</span>
               </div>
             )}
           </div>
         );
       }
-      case "stock": return <StockBadge stock={row.stock} />;
+      case "stock": return <StockBadge stock={row.stock_quantity} />;
       case "_actions": return (
         <div className="flex gap-2">
           <button onClick={() => openEdit(row)}
@@ -299,17 +337,14 @@ export default function AdminProducts() {
   };
 
   return (
-    <div>
+    <div className="p-6">
       <PageHeader
         title="Products"
         subtitle={`${total} total products`}
         actions={
           <button onClick={openCreate}
             className="flex items-center gap-2.5 px-5 py-2.5 bg-accent text-white rounded-xl font-display font-bold text-sm hover:bg-[var(--color-accent-hl)] transition-colors shadow-[0_2px_16px_rgba(108,95,255,0.4)]">
-            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-              <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
-            </svg>
-            Add Product
+            + Add Product
           </button>
         }
       />

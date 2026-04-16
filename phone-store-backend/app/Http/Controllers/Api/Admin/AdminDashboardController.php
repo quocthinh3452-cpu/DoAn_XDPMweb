@@ -6,43 +6,42 @@ use App\Http\Controllers\Controller;
 use App\Models\Order;
 use App\Models\Product;
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
 {
     public function getDashboardData()
     {
-        // 1. Thống kê tổng quan (Cards)
-        $stats = [
-            'totalRevenue' => Order::where('payment_status', 'paid')->sum('total_amount'),
-            'totalOrders' => Order::count(),
-            'totalProducts' => Product::count(),
-            'totalUsers' => User::where('role', 'user')->count(),
-        ];
+        // Tính tổng doanh thu (chỉ tính đơn hàng đã giao hoặc thanh toán thành công)
+        $totalRevenue = Order::where('status', 'delivered')->sum('total_amount');
+        
+        // Đếm tổng số đơn hàng
+        $totalOrders = Order::count();
+        
+        // Đếm số đơn hàng đang chờ xử lý
+        $pendingOrders = Order::where('status', 'pending')->count();
+        
+        // Đếm tổng số sản phẩm đang kinh doanh
+        $totalProducts = Product::where('is_active', 1)->count();
+        
+        // Đếm tổng số khách hàng (loại trừ admin)
+        $totalCustomers = User::where('role', 'user')->count();
 
-        // 2. Doanh thu 7 ngày gần nhất (Để vẽ biểu đồ Chart.js)
-        $revenueChart = Order::select(
-                DB::raw('DATE(created_at) as date'),
-                DB::raw('SUM(total_amount) as total')
-            )
-            ->where('payment_status', 'paid')
-            ->where('created_at', '>=', now()->subDays(7))
-            ->groupBy('date')
-            ->orderBy('date', 'asc')
-            ->get();
-
-        // 3. Đơn hàng gần đây
-        $recentOrders = Order::with('user')
+        // Lấy 5 đơn hàng mới nhất
+        $recentOrders = Order::with('user:id,name') // Cần setup quan hệ belongsTo trong Model Order
             ->orderBy('created_at', 'desc')
             ->take(5)
             ->get();
 
         return response()->json([
-            'data' => [
-                'stats' => $stats,
-                'revenueChart' => $revenueChart,
-                'recentOrders' => $recentOrders
-            ]
+            'stats' => [
+                'revenue' => $totalRevenue,
+                'total_orders' => $totalOrders,
+                'pending_orders' => $pendingOrders,
+                'total_products' => $totalProducts,
+                'total_customers' => $totalCustomers
+            ],
+            'recent_orders' => $recentOrders
         ]);
     }
 }

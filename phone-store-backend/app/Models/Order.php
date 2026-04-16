@@ -33,12 +33,17 @@ class Order extends Model
     // Mối quan hệ với chi tiết đơn hàng
     public function items()
     {
-        return $this->hasMany(OrderItem::class);
+       return $this->hasMany(OrderItem::class, 'order_id');
     }
 
     // Mối quan hệ với lịch sử trạng thái (Dòng thời gian đơn hàng)
     public function statusHistory()
     {
         return $this->hasMany(OrderStatusHistory::class,'order_id');
+    }
+    // Báo cho Laravel biết đơn hàng này thuộc về User nào
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

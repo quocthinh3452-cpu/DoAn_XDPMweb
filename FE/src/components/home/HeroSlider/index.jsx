@@ -135,12 +135,12 @@ export default function HeroSlider({ slides, onSlideView }) {
       style={{ touchAction: "pan-y", boxShadow: "0 1px 0 rgba(255,255,255,0.04), 0 24px 48px rgba(0,0,0,0.28)" }}
     >
       {/* ── Backgrounds ── */}
-      {prevSlide && <BgLayer key={`p${previous}`} slide={prevSlide} isActive={false} reducedMotion={reducedMotion} />}
-      <BgLayer key={`c${current}`} slide={slide} isActive={true} reducedMotion={reducedMotion} />
+      {prevSlide && <BgLayer key={`bg-prev-${previous}-${slideKey}`} slide={prevSlide} isActive={false} reducedMotion={reducedMotion} />}
+      <BgLayer key={`bg-curr-${current}-${slideKey}`} slide={slide} isActive={true} reducedMotion={reducedMotion} />
 
       {/* ── Ambient orbs ── */}
       {[current, previous].filter(i => i !== null).map(i => (
-        <AmbientOrb key={i} slide={slides[i]} slideIndex={i} isActive={i === current} reducedMotion={reducedMotion} />
+        <AmbientOrb key={`orb-${i}-${i === current ? 'curr' : 'prev'}-${slideKey}`} slide={slides[i]} slideIndex={i} isActive={i === current} reducedMotion={reducedMotion} />
       ))}
 
       {/* ── Grid texture ── */}

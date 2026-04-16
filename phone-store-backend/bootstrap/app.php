@@ -22,7 +22,10 @@ return Application::configure(basePath: dirname(__DIR__))
         // 2. Đăng ký file CorsMiddleware bạn đã tạo để cho phép React gọi API
         $middleware->append(\App\Http\Middleware\CorsMiddleware::class);
 
-        // Đã xóa (hoặc comment) dòng $middleware->statefulApi(); 
+        // 3. ĐĂNG KÝ BÍ DANH CHO MIDDLEWARE KIỂM TRA QUYỀN ADMIN
+        $middleware->alias([
+            'check.admin' => \App\Http\Middleware\CheckAdmin::class,
+        ]);
 
     })
     ->withExceptions(function (Exceptions $exceptions) {

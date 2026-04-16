@@ -6,14 +6,13 @@ use App\Http\Controllers\Controller;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Validation\ValidationException;
 
 class AuthController extends Controller
 {
-    // Đăng ký tài khoản
+    // Đăng ký (Thường chỉ dành cho User thường, Admin có thể tạo từ Seeder hoặc trang quản trị)
     public function register(Request $request)
     {
-        $request->validate([
+        $validated = $request->validate([
             'name' => 'required|string|max:150',
             'email' => 'required|string|email|max:150|unique:users',
             'password' => 'required|string|min:6',
@@ -21,25 +20,24 @@ class AuthController extends Controller
         ]);
 
         $user = User::create([
-            'name' => $request->name,
-            'email' => $request->email,
-            'password' => Hash::make($request->password),
-            'phone' => $request->phone,
-            'role' => 'user', 
+            'name' => $validated['name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+            'phone' => $validated['phone'],
+            'role' => 'user', // Mặc định đăng ký là user
             'status' => 'active',
         ]);
 
-        // Tạo API Token
-        $token = $user->createToken('techstore-auth')->plainTextToken;
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Đăng ký thành công',
             'user' => $user,
-            'access_token' => $token
+            'token' => $token
         ], 201);
     }
 
-    // Đăng nhập
+    // Đăng nhập chung cho cả Admin và User
     public function login(Request $request)
     {
         $request->validate([
@@ -49,44 +47,31 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->first();
 
-        // Kiểm tra user tồn tại và mật khẩu khớp (đã mã hóa Hash)
+        // Kiểm tra tồn tại và mật khẩu
         if (! $user || ! Hash::check($request->password, $user->password)) {
-            return response()->json([
-                'message' => 'Email hoặc mật khẩu không chính xác.'
-            ], 401);
+            return response()->json(['message' => 'Email hoặc mật khẩu không chính xác.'], 401);
         }
 
+        // Kiểm tra trạng thái tài khoản
         if ($user->status !== 'active') {
-            return response()->json([
-                'message' => 'Tài khoản của bạn đã bị khóa.'
-            ], 403);
+            return response()->json(['message' => 'Tài khoản của bạn đã bị khóa hoặc vô hiệu hóa.'], 403);
         }
 
-        // Tạo API Token mới
-        $token = $user->createToken('techstore-auth')->plainTextToken;
+        // Tạo token
+        $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
             'message' => 'Đăng nhập thành công',
-            'user' => $user,
-            'access_token' => $token
+            'user' => clone $user, // Clone để trả về object
+            'token' => $token,
+            'role' => $user->role // Gửi kèm role để Frontend dễ điều hướng (vào /admin hay /)
         ]);
     }
 
-    // Lấy thông tin user đang đăng nhập (dùng Token)
-    public function me(Request $request)
-    {
-        return response()->json([
-            'user' => $request->user()
-        ]);
-    }
-
-    // Đăng xuất (Xóa token hiện tại)
+    // Đăng xuất
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
-
-        return response()->json([
-            'message' => 'Đã đăng xuất thành công'
-        ]);
+        return response()->json(['message' => 'Đã đăng xuất']);
     }
 }

@@ -1,13 +1,6 @@
 import { clsx } from "clsx";
+import { twMerge } from "tailwind-merge";
 
-/**
- * cn() — class name builder
- * Accepts strings, arrays, objects (falsy values ignored).
- *
- * Usage:
- *   cn("base", isActive && "active", { "hidden": !visible })
- *   cn(["a", "b"], condition ? "x" : "y")
- */
 export function cn(...inputs) {
-  return clsx(inputs);
+  return twMerge(clsx(inputs));
 }
