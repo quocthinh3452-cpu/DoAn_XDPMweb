@@ -27,7 +27,7 @@ export function useNavKeyboard(searchOpen, openSearch) {
         ["INPUT", "TEXTAREA", "SELECT"].includes(document.activeElement?.tagName) ||
         document.activeElement?.isContentEditable;
 
-      const printable = e.key.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey;
+      const printable = e.key?.length === 1 && !e.metaKey && !e.ctrlKey && !e.altKey;
 
       if (printable && !isEditing) {
         openSearch(e.key);

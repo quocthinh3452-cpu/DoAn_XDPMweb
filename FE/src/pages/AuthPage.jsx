@@ -442,16 +442,41 @@ export default function AuthPage() {
     setApiError("");
     try {
       if (tab === "login") {
+        // ĐĂNG NHẬP
         const u = await login({ email: form.email, password: form.password });
-        success("Welcome back!", u.name);
+        success("Thành công!", `Chào mừng trở lại!`);
       } else {
-        const u = await register({ name: form.name, email: form.email, password: form.password });
-        success("Account created!", `Welcome, ${u.name}`);
+        // ĐĂNG KÝ: Đã thêm biến confirmPassword để gửi qua authService
+        const u = await register({ 
+            name: form.name, 
+            email: form.email, 
+            password: form.password,
+            confirmPassword: form.confirm // Quan trọng: Gửi trường này đi
+        });
+        success("Thành công!", `Đăng ký tài khoản thành công!`);
       }
       navigate(redirectTo, { replace: true });
     } catch (err) {
-      setApiError(err.message);
-      toastErr("Authentication failed", err.message);
+      // ---------------------------------------------------------
+      // XỬ LÝ VÀ DỊCH LỖI API SANG TIẾNG VIỆT
+      // ---------------------------------------------------------
+      let viMessage = "Đã có lỗi xảy ra, vui lòng kiểm tra lại kết nối.";
+
+      if (err.response) {
+          const status = err.response.status;
+          
+          if (status === 422) {
+              viMessage = "Email này đã được sử dụng. Vui lòng chọn email khác!";
+          } else if (status === 401) {
+              viMessage = "Email hoặc mật khẩu không chính xác!";
+          } else {
+              // Lấy tin nhắn lỗi từ Backend nếu có (cho các lỗi khác)
+              viMessage = err.response.data?.message || viMessage;
+          }
+      }
+
+      setApiError(viMessage); // Hiển thị chữ đỏ trên Form
+      toastErr("Thất bại", viMessage); // Hiển thị thông báo Toast ở góc màn hình
     } finally {
       setLoading(false);
     }
