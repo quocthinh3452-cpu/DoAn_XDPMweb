@@ -1,34 +1,23 @@
-// ============================================================
-// HOME SERVICE
-// ============================================================
-// Future Laravel endpoint:
-//   GET /api/home  →  { slides, promos, brands, featured, newArrivals }
-//
-// Laravel tip: Create a HomeController@index that aggregates
-// all homepage data in a single request to minimize round trips.
-// ============================================================
+import axios from 'axios';
 
-import { simulateDelay } from "./apiClient";
-import { HERO_SLIDES, PROMO_BANNERS, BRANDS, WHY_US } from "../data/home";
-import { PRODUCTS } from "../data/products";
+// Thiết lập URL cơ sở của Laravel
+const API_URL = 'http://localhost:8000/api';
 
 /**
  * GET /api/home
- * Returns all data needed to render the homepage
+ * Lấy toàn bộ dữ liệu trang chủ từ Laravel
  */
 export async function getHomeData() {
-  await simulateDelay(350);
-
-  return {
-    data: {
-      slides:      HERO_SLIDES,
-      promos:      PROMO_BANNERS,
-      brands:      BRANDS,
-      whyUs:       WHY_US,
-      featured:    PRODUCTS.filter((p) => p.isFeatured).slice(0, 4),
-      newArrivals: PRODUCTS.filter((p) => p.isNew).slice(0, 4),
-      topRated:    [...PRODUCTS].sort((a, b) => b.rating - a.rating).slice(0, 4),
-      deals:       PRODUCTS.filter((p) => p.originalPrice > p.price).slice(0, 4),
-    },
-  };
-}
+  try {
+    const response = await axios.get(`${API_URL}/home`);
+    
+    // Lưu ý: Cấu trúc trả về phải bọc trong { data: ... } 
+    // vì HomePage.jsx của bạn đang gọi .then((r) => setData(r.data))
+    return {
+      data: response.data
+    };
+  } catch (error) {
+    console.error("Lỗi gọi API getHomeData:", error);
+    throw error;
+  }
+} 

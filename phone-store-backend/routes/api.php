@@ -32,13 +32,11 @@ Route::middleware('auth:sanctum')->group(function () {
     // ==========================================
     // ADMIN ROUTES (Bắt buộc Token + Role Admin)
     // ==========================================
-    // LỖ HỔNG Ở CODE CŨ: Bạn chỉ check 'auth:sanctum', nghĩa là User thường đăng nhập xong cũng gọi được API xóa sản phẩm.
-    // CÁCH SỬA: Thêm middleware kiểm tra quyền admin.
     Route::middleware('check.admin')->prefix('admin')->group(function () {
         
         // Thống kê Dashboard
         Route::get('/dashboard', [AdminDashboardController::class, 'getDashboardData']);
-
+        
         // Quản lý Sản phẩm (Gợi ý dùng apiResource cho gọn)
         Route::apiResource('products', AdminProductController::class);
         // apiResource tự động tạo ra: GET /products, POST /products, GET /products/{id}, PUT /products/{id}, DELETE /products/{id}
@@ -50,5 +48,7 @@ Route::middleware('auth:sanctum')->group(function () {
         // Quản lý Người dùng
         Route::get('/users', [AdminUserController::class, 'index']);
         Route::patch('/users/{id}/toggle-status', [AdminUserController::class, 'toggleStatus']);
+
+        Route::get('/orders/{id}', [AdminOrderController::class, 'show']);
     });
 });

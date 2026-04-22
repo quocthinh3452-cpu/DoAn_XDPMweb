@@ -11,7 +11,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     getDashboardData()
-      .then((r) => setData(r.data))
+      .then((r) => setData(r))
       .catch((e) => setError(e.message))
       .finally(() => setLoading(false));
   }, []);

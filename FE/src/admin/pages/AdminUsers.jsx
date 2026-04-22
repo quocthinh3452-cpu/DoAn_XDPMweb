@@ -5,23 +5,23 @@ import { formatPrice } from "../../utils/helpers";
 import { PageHeader, SearchBar, FilterSelect, Pagination, MetricRow, StatusBadge, Toggle, useDebounce, Spinner } from "../components/ui/AdminUI";
 
 const STATUS_OPTIONS = [
-  { value: "all",      label: "All Users"  },
-  { value: "active",   label: "Active"     },
-  { value: "inactive", label: "Inactive"   },
+  { value: "all", label: "All Users" },
+  { value: "active", label: "Active" },
+  { value: "inactive", label: "Inactive" },
 ];
 
 const SORT_OPTIONS = [
-  { value: "spent",    label: "Highest LTV"    },
-  { value: "orders",   label: "Most Orders"    },
-  { value: "joinedAt", label: "Recently Joined"},
-  { value: "name",     label: "Name (A–Z)"     },
+  { value: "spent", label: "Highest LTV" },
+  { value: "orders", label: "Most Orders" },
+  { value: "joinedAt", label: "Recently Joined" },
+  { value: "name", label: "Name (A–Z)" },
 ];
 
 // Color-coded avatar
-const AVATAR_COLORS = ["#6c63ff","#22c55e","#f59e0b","#ec4899","#3b82f6","#8b5cf6","#14b8a6","#f97316"];
+const AVATAR_COLORS = ["#6c63ff", "#22c55e", "#f59e0b", "#ec4899", "#3b82f6", "#8b5cf6", "#14b8a6", "#f97316"];
 function UserAvatar({ name, size = 10 }) {
   const col = AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
-  const px  = size * 4;
+  const px = size * 4;
   return (
     <div className="rounded-full font-display font-bold text-white flex items-center justify-center shrink-0 ring-2 ring-border"
       style={{
@@ -70,9 +70,9 @@ function UserDetail({ user }) {
     <div className="bg-surface2 rounded-2xl p-5 mt-2 border border-border/50 shadow-sm">
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
         {[
-          ["Email",       user.email],
-          ["Joined",      new Date(user.joinedAt).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})],
-          ["Orders",      user.orders],
+          ["Email", user.email],
+          ["Joined", new Date(user.joinedAt).toLocaleDateString("en-US", { month: "long", day: "numeric", year: "numeric" })],
+          ["Orders", user.orders],
           ["Total Spent", user.spent > 0 ? formatPrice(user.spent) : "—"],
         ].map(([l, v]) => (
           <div key={l} className="bg-surface rounded-xl p-3 border border-border/50">
@@ -88,18 +88,18 @@ function UserDetail({ user }) {
 export default function AdminUsers() {
   const { success, error } = useToast();
 
-  const [searchRaw,  setSearchRaw]  = useState("");
+  const [searchRaw, setSearchRaw] = useState("");
   const search = useDebounce(searchRaw, 350);
 
-  const [status,     setStatus]     = useState("all");
-  const [sortVal,    setSortVal]    = useState("spent");
-  const [page,       setPage]       = useState(1);
-  const [users,      setUsers]      = useState([]);
-  const [total,      setTotal]      = useState(0);
+  const [status, setStatus] = useState("all");
+  const [sortVal, setSortVal] = useState("spent");
+  const [page, setPage] = useState(1);
+  const [users, setUsers] = useState([]);
+  const [total, setTotal] = useState(0);
   const [totalPages, setTotalPages] = useState(1);
-  const [loading,    setLoading]    = useState(true);
-  const [toggling,   setToggling]   = useState(null);
-  const [expanded,   setExpanded]   = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [toggling, setToggling] = useState(null);
+  const [expanded, setExpanded] = useState(null);
 
   const sortKey = sortVal === "name" ? "name" : sortVal;
   const sortDir = sortVal === "name" || sortVal === "joinedAt" ? "asc" : "desc";
@@ -120,18 +120,19 @@ export default function AdminUsers() {
   const handleToggle = async (user) => {
     setToggling(user.id);
     try {
-      const res = await toggleUserStatus(user.id);
-      success("Status changed", `${user.name} is now ${res.data.status}`);
-      load();
+      await toggleUserStatus(user.id); // Gọi API
+      // Bỏ việc cố đọc res.data.status, chỉ cần báo thành công là đủ
+      success("Thành công", `Đã cập nhật trạng thái của ${user.name}`); 
+      load(); // Tải lại danh sách để tự cập nhật màu sắc
     } catch (e) { error("Failed", e.message); }
     finally { setToggling(null); }
   };
 
-  const totalSpent  = users.reduce((s, u) => s + u.spent, 0);
+  const totalSpent = users.reduce((s, u) => s + u.spent, 0);
   const activeCount = users.filter((u) => u.status === "active").length;
-  const vipCount    = users.filter((u) => u.spent >= 5000).length;
-  const avgLTV      = users.length ? Math.round(totalSpent / users.length) : 0;
-  const maxOrders   = Math.max(...users.map((u) => u.orders), 1);
+  const vipCount = users.filter((u) => u.spent >= 5000).length;
+  const avgLTV = users.length ? Math.round(totalSpent / users.length) : 0;
+  const maxOrders = Math.max(...users.map((u) => u.orders), 1);
 
   const rowsWithDetail = users.reduce((acc, row) => {
     acc.push(row);
@@ -140,11 +141,11 @@ export default function AdminUsers() {
   }, []);
 
   const cols = [
-    { key:"name",     label:"User",   w:"auto"  },
-    { key:"joinedAt", label:"Joined", w:"140px" },
-    { key:"orders",   label:"Orders", w:"145px" },
-    { key:"spent",    label:"LTV",    w:"200px" },
-    { key:"status",   label:"Status", w:"180px" },
+    { key: "name", label: "User", w: "auto" },
+    { key: "joinedAt", label: "Joined", w: "140px" },
+    { key: "orders", label: "Orders", w: "145px" },
+    { key: "spent", label: "LTV", w: "200px" },
+    { key: "status", label: "Status", w: "180px" },
   ];
 
   const renderCell = (col, row) => {
@@ -164,7 +165,7 @@ export default function AdminUsers() {
       );
       case "joinedAt": return (
         <span className="text-xs text-muted font-medium">
-          {new Date(row.joinedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"})}
+          {new Date(row.joinedAt).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
         </span>
       );
       case "orders": return <OrderBar orders={row.orders} max={maxOrders} />;
@@ -177,7 +178,7 @@ export default function AdminUsers() {
       case "status": return (
         <div className="flex items-center gap-3">
           <Toggle
-            checked={row.status === "active"}
+            checked={row.status === "active" || row.status == 1}
             onChange={() => handleToggle(row)}
             disabled={toggling === row.id}
           />
@@ -197,16 +198,16 @@ export default function AdminUsers() {
 
       {!loading && (
         <MetricRow items={[
-          ["Active",  activeCount,                   `of ${users.length} this page`],
-          ["Revenue", formatPrice(totalSpent),        "from this page"],
-          ["Avg LTV", `$${avgLTV.toLocaleString()}`,  "per customer"],
-          ["VIP",     vipCount,                       "spent $5k+", vipCount > 0 ? "success" : null],
+          ["Active", activeCount, `of ${users.length} this page`],
+          ["Revenue", formatPrice(totalSpent), "from this page"],
+          ["Avg LTV", `$${avgLTV.toLocaleString()}`, "per customer"],
+          ["VIP", vipCount, "spent $5k+", vipCount > 0 ? "success" : null],
         ]} />
       )}
 
       <div className="flex items-center gap-3 mb-6 flex-wrap">
         <SearchBar value={searchRaw} onChange={setSearchRaw} placeholder="Name or email…" />
-        <FilterSelect value={status}  onChange={setStatus}  options={STATUS_OPTIONS} />
+        <FilterSelect value={status} onChange={setStatus} options={STATUS_OPTIONS} />
         <FilterSelect value={sortVal} onChange={setSortVal} options={SORT_OPTIONS} />
       </div>
 
@@ -227,26 +228,26 @@ export default function AdminUsers() {
             <tbody>
               {loading
                 ? Array.from({ length: 6 }).map((_, i) => (
-                    <tr key={i} className="border-b border-border/40">
-                      {cols.map((_, j) => (
-                        <td key={j} className="px-6 py-5">
-                          <div className="skeleton h-3.5 rounded" style={{ width:`${55+((i*3+j*7)%35)}%` }} />
-                        </td>
-                      ))}
-                    </tr>
-                  ))
-                : rowsWithDetail.length === 0
-                ? (
-                  <tr>
-                    <td colSpan={cols.length} className="px-6 py-24 text-center">
-                      <div className="flex flex-col items-center gap-3">
-                        <div className="w-12 h-12 rounded-2xl bg-surface3 flex items-center justify-center text-xl opacity-50">👥</div>
-                        <p className="text-sm text-muted">No users found.</p>
-                      </div>
-                    </td>
+                  <tr key={i} className="border-b border-border/40">
+                    {cols.map((_, j) => (
+                      <td key={j} className="px-6 py-5">
+                        <div className="skeleton h-3.5 rounded" style={{ width: `${55 + ((i * 3 + j * 7) % 35)}%` }} />
+                      </td>
+                    ))}
                   </tr>
-                )
-                : rowsWithDetail.map((row) =>
+                ))
+                : rowsWithDetail.length === 0
+                  ? (
+                    <tr>
+                      <td colSpan={cols.length} className="px-6 py-24 text-center">
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="w-12 h-12 rounded-2xl bg-surface3 flex items-center justify-center text-xl opacity-50">👥</div>
+                          <p className="text-sm text-muted">No users found.</p>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                  : rowsWithDetail.map((row) =>
                     row.__detail
                       ? (
                         <tr key={`d-${row.__user.id}`} className="bg-surface2/40">
@@ -257,9 +258,8 @@ export default function AdminUsers() {
                       )
                       : (
                         <tr key={row.id}
-                          className={`border-b border-border/40 last:border-b-0 transition-colors ${
-                            expanded === row.id ? "bg-surface3/40" : "hover:bg-surface3/50"
-                          }`}>
+                          className={`border-b border-border/40 last:border-b-0 transition-colors ${expanded === row.id ? "bg-surface3/40" : "hover:bg-surface3/50"
+                            }`}>
                           {cols.map((col) => (
                             <td key={col.key} className="px-6 py-4 align-middle">
                               {renderCell(col, row)}

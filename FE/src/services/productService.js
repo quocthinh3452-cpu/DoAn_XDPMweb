@@ -1,104 +1,68 @@
-// ============================================================
-// PRODUCT SERVICE
-// ============================================================
-// Defined endpoints (to be implemented in Laravel):
-//   GET    /api/products               → getProducts(filters)
-//   GET    /api/products/:id           → getProductById(id)
-//   GET    /api/products/featured      → getFeaturedProducts()
-//   GET    /api/categories             → getCategories()
-//
-// To connect to real backend: Replace each function body with
-// an apiGet() call to the corresponding endpoint above.
-// ============================================================
+import axios from 'axios';
 
-import { PRODUCTS, CATEGORIES } from "../data/products";
-import { simulateDelay } from "./apiClient";
+// Thiết lập URL cơ sở của Laravel
+const API_URL = 'http://localhost:8000/api';
 
 /**
  * GET /api/products
- * Fetches all products with optional filters
- * @param {Object} filters - { category, search, sort, minPrice, maxPrice }
+ * Lấy danh sách sản phẩm kèm bộ lọc (dùng cho trang danh sách sản phẩm)
  */
 export async function getProducts(filters = {}) {
-  await simulateDelay(500);
-
-  let results = [...PRODUCTS];
-
-  // Filter by category
-  if (filters.category && filters.category !== "all") {
-    results = results.filter((p) => p.category === filters.category);
+  try {
+    // Axios sẽ tự động biến object filters thành query string: ?category=...&search=...
+    const response = await axios.get(`${API_URL}/products`, { params: filters });
+    return response.data; // Laravel trả về { data, total, totalPages }
+  } catch (error) {
+    console.error("Lỗi getProducts:", error);
+    throw error;
   }
-
-  // Search by name or brand
-  if (filters.search) {
-    const q = filters.search.toLowerCase();
-    results = results.filter(
-      (p) =>
-        p.name.toLowerCase().includes(q) ||
-        p.brand.toLowerCase().includes(q) ||
-        p.tags?.some((t) => t.toLowerCase().includes(q))
-    );
-  }
-
-  // Price range
-  if (filters.minPrice != null) {
-    results = results.filter((p) => p.price >= filters.minPrice);
-  }
-  if (filters.maxPrice != null) {
-    results = results.filter((p) => p.price <= filters.maxPrice);
-  }
-
-  // Sorting
-  switch (filters.sort) {
-    case "price_asc":
-      results.sort((a, b) => a.price - b.price);
-      break;
-    case "price_desc":
-      results.sort((a, b) => b.price - a.price);
-      break;
-    case "rating":
-      results.sort((a, b) => b.rating - a.rating);
-      break;
-    case "newest":
-      results.sort((a, b) => (b.isNew ? 1 : 0) - (a.isNew ? 1 : 0));
-      break;
-    default:
-      break;
-  }
-
-  return { data: results, total: results.length };
 }
 
 /**
  * GET /api/products/:id
- * Fetches a single product by ID
- * @param {number|string} id
+ * Lấy chi tiết 1 sản phẩm (dùng cho trang ProductDetail)
  */
 export async function getProductById(id) {
-  await simulateDelay(300);
-
-  const product = PRODUCTS.find((p) => p.id === Number(id));
-  if (!product) throw new Error("Product not found");
-
-  return { data: product };
-}
-
-/**
- * GET /api/products/featured
- * Fetches featured products for the hero section
- */
-export async function getFeaturedProducts() {
-  await simulateDelay(400);
-
-  const featured = PRODUCTS.filter((p) => p.isFeatured).slice(0, 4);
-  return { data: featured };
+  try {
+    const response = await axios.get(`${API_URL}/products/${id}`);
+    
+    // Lưu ý: Để khớp với HomePage.jsx đang dùng .then((r) => setData(r.data))
+    // Chúng ta trả về cấu trúc { data: ... }
+    return {
+      data: response.data
+    };
+  } catch (error) {
+    console.error(`Lỗi getProductById (${id}):`, error);
+    throw error;
+  }
 }
 
 /**
  * GET /api/categories
- * Fetches all product categories
+ * Lấy danh sách danh mục để đổ vào bộ lọc
  */
 export async function getCategories() {
-  await simulateDelay(200);
-  return { data: CATEGORIES };
+  try {
+    const response = await axios.get(`${API_URL}/categories`);
+    return response.data; // Trả về mảng các danh mục
+  } catch (error) {
+    console.error("Lỗi getCategories:", error);
+    throw error;
+  }
+}
+
+/**
+ * GET /api/products/featured
+ * Lấy sản phẩm nổi bật cho trang chủ
+ */
+export async function getFeaturedProducts() {
+  try {
+    const response = await axios.get(`${API_URL}/home`);
+    return {
+      data: response.data.featured // Trả về mảng featured từ API homeData
+    };
+  } catch (error) {
+    console.error("Lỗi getFeaturedProducts:", error);
+    throw error;
+  }
 }

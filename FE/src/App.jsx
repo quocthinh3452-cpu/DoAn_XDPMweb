@@ -157,7 +157,7 @@ function StorefrontShell() {
   return (
     <div className="app-shell">
       <Navbar products={PRODUCTS} />
-      <main className="main-content">
+      <main className="main-content w-full max-w-[1440px] mx-auto">
         <ErrorBoundary>
           <Routes>
             <Route path="/"             element={<HomePage />} />
@@ -203,10 +203,10 @@ export default function App() {
                         </AdminRoute>
                       }
                     >
-                      <Route index           element={<AdminDashboard />} />
-                      <Route path="orders"   element={<AdminOrders />} />
-                      <Route path="products" element={<AdminProducts />} />
-                      <Route path="users"    element={<AdminUsers />} />
+                      <Route path="dashboard" element={<AdminDashboard />} />
+                      <Route path="orders"    element={<AdminOrders />} />
+                      <Route path="products"  element={<AdminProducts />} />
+                      <Route path="users"     element={<AdminUsers />} />
                     </Route>
 
                     <Route path="*" element={<StorefrontShell />} />

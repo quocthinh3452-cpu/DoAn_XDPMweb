@@ -6,7 +6,7 @@ import { useToast } from "../../../context/ToastContext";
 import { AdminErrorBoundary } from "../ui/AdminUI";
 
 const NAV = [
-  { path: "/admin",          label: "Dashboard", icon: "▦",  exact: true },
+  { path: "/admin/dashboard",          label: "Dashboard", icon: "▦",  exact: true },
   { path: "/admin/orders",   label: "Orders",    icon: "📦"               },
   { path: "/admin/products", label: "Products",  icon: "📱"               },
   { path: "/admin/users",    label: "Users",     icon: "👥"               },
@@ -193,11 +193,11 @@ export default function AdminLayout() {
         </header>
 
         {/* Content */}
-        <main className="flex-1 p-6 lg:p-9 max-w-[1480px] w-full mx-auto">
+      <main className="flex-1 min-w-0 p-6 lg:p-9 max-w-[1480px] w-full mx-auto">
           <AdminErrorBoundary>
             <Outlet />
           </AdminErrorBoundary>
-        </main>
+        </main>   
       </div>
     </div>
   );

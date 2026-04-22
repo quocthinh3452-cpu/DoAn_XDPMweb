@@ -31,14 +31,14 @@ export default function HomePage() {
 
       {/* ── Hero — full-bleed, no horizontal padding ── */}
       {data
-        ? <HeroSlider slides={data.slides} />
+        ? <HeroSlider slides={data.slides || []} />
         : <div className="skeleton h-[580px] rounded-none" aria-hidden="true" />
       }
 
       {/* ── Page sections ── */}
       <div className="stack-page pb-32" style={{ paddingTop: "var(--space-section)" }}>
         {data
-          ? <PromoBanners banners={data.promos} />
+          ? <PromoBanners banners={data.promos || []} />
           : <div style={{ height: "var(--space-section)" }} aria-hidden />
         }
         <CategoryShowcase />

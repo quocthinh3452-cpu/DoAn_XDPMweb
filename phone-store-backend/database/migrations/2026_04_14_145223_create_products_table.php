@@ -6,30 +6,21 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
-        Schema::create('products', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');
-            $table->string('slug')->unique();
-            $table->text('description')->nullable();
-            $table->decimal('regular_price', 10, 2);
-            $table->decimal('sale_price', 10, 2)->nullable();
-            $table->boolean('is_active')->default(true);
-            $table->foreignId('category_id')->constrained()->onDelete('cascade');
-            $table->decimal('rating_avg', 3, 2)->default(0);
-            $table->timestamps();
+        Schema::table('products', function (Blueprint $table) {
+            // Thêm các cột mới dưới dạng JSON để lưu mảng/object
+            $table->json('colors')->nullable()->after('description'); 
+            $table->json('storage')->nullable()->after('colors');
+            $table->json('specs')->nullable()->after('storage');
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('products');
+        Schema::table('products', function (Blueprint $table) {
+            // Xóa các cột này nếu bạn muốn Rollback (hoàn tác)
+            $table->dropColumn(['colors', 'storage', 'specs']);
+        });
     }
 };

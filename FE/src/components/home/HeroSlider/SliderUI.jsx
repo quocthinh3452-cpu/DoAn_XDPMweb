@@ -243,27 +243,44 @@ export function ProgressBar({ accentColor, slideKey, barRef, reducedMotion }) {
 ═══════════════════════════════════════════════════════════ */
 export function SlideImage({ src, alt, accentColor }) {
   const [loaded, setLoaded] = useState(false);
-  useEffect(() => { setLoaded(false); }, [src]);
+  const [error, setError] = useState(false);
+
+  // Tự động làm sạch link nếu có ký tự &amp;
+  const cleanSrc = src ? src.replace(/&amp;/g, '&') : '';
+
+  useEffect(() => {
+    setLoaded(false);
+    setError(false);
+  }, [src]);
 
   return (
-    <div className="relative w-full rounded-2xl overflow-hidden"
+    <div className="relative w-full rounded-2xl overflow-hidden bg-[#1a1a1a]"
       style={{
         height: "clamp(210px,37vw,420px)",
-        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07), 0 32px 72px rgba(0,0,0,0.50), 0 0 0 1px rgba(255,255,255,0.04)",
+        boxShadow: "inset 0 1px 0 rgba(255,255,255,0.07), 0 32px 72px rgba(0,0,0,0.50)",
       }}>
-      <div aria-hidden className="skeleton absolute inset-0"
-        style={{ opacity: loaded ? 0 : 1, transition: "opacity 280ms ease" }} />
-      <img key={src} src={src} alt={alt} draggable={false}
+      
+      {/* Skeleton - Hiện khi đang tải hoặc ảnh bị lỗi */}
+      {(!loaded || error) && (
+        <div className="skeleton absolute inset-0 z-20 flex items-center justify-center" 
+             style={{ background: "rgba(255,255,255,0.03)" }}>
+          {error && <span className="text-muted text-xs opacity-50">Không thể tải ảnh</span>}
+        </div>
+      )}
+
+      <img 
+        key={cleanSrc}
+        src={error ? 'https://placehold.co/800x600/1a1a1a/6c63ff?text=TechStore' : cleanSrc} 
+        alt={alt} 
+        draggable={false}
         onLoad={() => setLoaded(true)}
-        style={{
-          position: "absolute", inset: 0,
-          width: "100%", height: "100%",
-          objectFit: "cover", display: "block",
-          opacity: loaded ? 1 : 0,
-          transition: "opacity 340ms ease",
-        }} />
-      <div aria-hidden className="absolute inset-x-0 top-0 z-10 pointer-events-none"
-        style={{ height: 1, background: `linear-gradient(90deg, transparent, ${accentColor}48, transparent)` }} />
+        onError={() => setError(true)} // Nếu lỗi thì chuyển sang ảnh fallback
+        className="w-full h-full object-cover block relative z-10"
+        style={{ 
+          opacity: loaded ? 1 : 0, 
+          transition: "opacity 500ms ease-in-out" 
+        }} 
+      />
     </div>
   );
 }
