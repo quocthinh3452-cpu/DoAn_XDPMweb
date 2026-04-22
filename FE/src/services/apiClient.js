@@ -9,7 +9,7 @@ export const simulateDelay = (ms = 1000) => new Promise(resolve => setTimeout(re
 // CẤU HÌNH AXIOS GỌI BACKEND
 // ==========================================
 const apiClient = axios.create({
-  baseURL: 'http://localhost:8000/api', // Trỏ vào backend Laravel
+  baseURL: import.meta.env.VITE_API_URL, // Trỏ vào backend Laravel
   headers: {
     'Accept': 'application/json',
   },
