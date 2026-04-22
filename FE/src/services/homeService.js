@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // Thiết lập URL cơ sở của Laravel
-const API_URL = 'http://localhost:8000/api';
+const API_URL = import.meta.env.VITE_API_URL;
 
 /**
  * GET /api/home
