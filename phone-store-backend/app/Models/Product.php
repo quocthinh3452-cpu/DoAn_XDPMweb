@@ -11,25 +11,31 @@ class Product extends Model
 
     // Bước 1: Khai báo đầy đủ các cột theo logic DB chuyên nghiệp đã tạo
     protected $fillable = [
-        'category_id',
         'name',
         'slug',
-        'sku',
         'description',
         'regular_price',
         'sale_price',
         'stock_quantity',
-        'rating_avg',
-        'is_active',
+        'category_id',
+        'colors',
+        'storage',
+        'specs' // Đảm bảo có các dòng này
     ];
-
+       protected $casts = [
+        'colors' => 'array',
+        'storage' => 'array',
+        'specs' => 'array',
+    ];
     // Thiết lập mối quan hệ với Ảnh sản phẩm
-   public function primaryImage() {
+    public function primaryImage()
+    {
         return $this->hasOne(ProductImage::class, 'product_id')->where('is_primary', 1);
     }
 
     // Thiết lập mối quan hệ với Danh mục
-  public function category() {
-    return $this->belongsTo(Category::class, 'category_id');
-}
+    public function category()
+    {
+        return $this->belongsTo(Category::class, 'category_id');
+    }
 }

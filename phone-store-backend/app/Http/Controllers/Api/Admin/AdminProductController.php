@@ -14,7 +14,8 @@ class AdminProductController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Product::with('category:id,name,slug');
+        $query = Product::with(['category', 'primaryImage'])
+                    ->where('is_active', 1); // CHỈ lấy những sản phẩm đang hoạt động
 
         // 1. Lọc theo từ khóa tìm kiếm (Tên hoặc SKU)
         if ($request->filled('search')) {
@@ -73,7 +74,7 @@ class AdminProductController extends Controller
         });
         // 6. Format lại Response để khớp chính xác với state của React (res.data, res.total, res.totalPages)
         return response()->json([
-            'data' => $products->items(),
+            'data' => $mappedData,
             'total' => $products->total(),
             'totalPages' => $products->lastPage(),
             'currentPage' => $products->currentPage()
@@ -237,13 +238,13 @@ class AdminProductController extends Controller
             return response()->json(['message' => 'Không tìm thấy sản phẩm'], 404);
         }
 
-        // Lưu ý: Ràng buộc khóa ngoại ở Database đang là ON DELETE RESTRICT cho category
-        // Nhưng nếu xóa product thì phải cẩn thận các order_items đang tham chiếu đến nó.
-        // Tốt nhất trong e-commerce, thay vì xóa cứng (delete), ta nên cập nhật is_active = 0 (Soft Delete).
+        // Cách 1: Xóa mềm bằng cách đổi is_active thành 0
+        // $product->is_active = 0;
+        // $product->save(); // QUAN TRỌNG: Phải có lệnh save() này
 
-        // $product->delete(); // Xóa hẳn
-        $product->update(['is_active' => 0]); // Khuyên dùng: Ẩn sản phẩm đi
+        // Cách 2: Nếu bạn muốn xóa hẳn khỏi database
+        $product->delete(); 
 
-        return response()->json(['message' => 'Sản phẩm đã được ngưng bán']);
+        return response()->json(['message' => 'Xóa thành công']);
     }
 }

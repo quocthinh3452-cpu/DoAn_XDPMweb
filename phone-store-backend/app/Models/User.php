@@ -31,4 +31,9 @@ class User extends Authenticatable
         'email_verified_at' => 'datetime',
         'password' => 'hashed', // Laravel sẽ tự động Hash khi bạn tạo user mới
     ];
+    // Thêm hàm này vào bên trong class User
+    public function orders()
+    {
+        return $this->hasMany(Order::class, 'user_id', 'id');
+    }
 }

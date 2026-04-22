@@ -15,61 +15,97 @@ class AdminUserController extends Controller
 {
     public function index(Request $request)
     {
-        // Chỉ lấy những người dùng có vai trò là 'user' (khách hàng)
-        $query = User::where('role', 'user');
+        try {
+            $query = \App\Models\User::query();
 
-        // 1. Tìm kiếm theo Tên hoặc Email
-        if ($request->filled('search')) {
-            $search = $request->search;
-            $query->where(function ($q) use ($search) {
-                $q->where('name', 'like', "%{$search}%")
-                    ->orWhere('email', 'like', "%{$search}%")
-                    ->orWhere('phone', 'like', "%{$search}%");
+            // 1. Xử lý Tìm kiếm (Search)
+            if ($request->filled('search')) {
+                $search = $request->search;
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', "%{$search}%")
+                        ->orWhere('email', 'like', "%{$search}%");
+                });
+            }
+
+            // 2. Xử lý Lọc trạng thái (Status)
+            if ($request->filled('status') && $request->status !== 'all') {
+                $query->where('status', $request->status);
+            }
+
+            // 3. TÍNH TOÁN DỮ LIỆU BẰNG SQL (Siêu nhanh, không bị nghẽn)
+            $query->withCount('orders') // Tạo ra cột 'orders_count'
+                ->withSum('orders', 'total_amount'); // Tạo ra cột 'orders_sum_total_amount'
+
+            // 4. Xử lý Sắp xếp (Sort) dựa theo biến React gửi lên
+            $sortKey = $request->input('sortKey', 'joinedAt');
+            $sortDir = $request->input('sortDir', 'desc');
+
+            if ($sortKey === 'spent') {
+                $query->orderBy('orders_sum_total_amount', $sortDir);
+            } elseif ($sortKey === 'orders') {
+                $query->orderBy('orders_count', $sortDir);
+            } elseif ($sortKey === 'joinedAt') {
+                $query->orderBy('created_at', $sortDir);
+            } else {
+                // Sắp xếp theo tên (A-Z)
+                $query->orderBy('name', $sortDir);
+            }
+
+            // 5. Phân trang
+            $page = $request->input('page', 1);
+            $users = $query->paginate(10, ['*'], 'page', $page);
+
+            // 6. "Gọt giũa" dữ liệu (Map) để tên biến khớp 100% với React
+            $formattedUsers = $users->map(function ($user) {
+                return [
+                    'id'       => $user->id,
+                    'name'     => $user->name,
+                    'email'    => $user->email,
+                    'status'   => $user->status, // active hoặc inactive
+                    'joinedAt' => $user->created_at,
+                    // Lấy số liệu tính toán từ bước 3, mặc định bằng 0 nếu chưa mua gì
+                    'orders'   => (int) $user->orders_count,
+                    'spent'    => (float) ($user->orders_sum_total_amount ?? 0),
+                ];
             });
+
+            // 7. Trả về format chuẩn
+            return response()->json([
+                'data'       => $formattedUsers,
+                'total'      => $users->total(),
+                'totalPages' => $users->lastPage()
+            ]);
+        } catch (\Exception $e) {
+            User::error("Lỗi get Users: " . $e->getMessage());
+            return response()->json(['error' => 'Lỗi Backend: ' . $e->getMessage()], 500);
         }
-
-        // 2. Lọc theo trạng thái (active/inactive/banned)
-        if ($request->filled('status') && $request->status !== 'all') {
-            $query->where('status', $request->status);
-        }
-
-        // 3. Sắp xếp
-        $sortKey = $request->input('sortKey', 'created_at');
-        if ($sortKey === 'createdAt') $sortKey = 'created_at';
-        $sortDir = $request->input('sortDir', 'desc');
-        if ($sortKey === 'spent' || !$sortKey) {
-            $sortKey = 'id';
-        }
-        $query->orderBy($sortKey, $sortDir);
-
-        // Kiểm tra nếu cột tồn tại trong DB thì mới sắp xếp, tránh lỗi SQL
-        // Nếu FE gửi 'spent' mà DB chưa có, ta mặc định sắp xếp theo 'id' hoặc 'created_at'
-        $allowedSorts = ['name', 'email', 'status', 'created_at', 'id'];
-        if (!in_array($sortKey, $allowedSorts)) {
-            $sortKey = 'created_at';
-        }
-
-        $query->orderBy($sortKey, $sortDir);
-
-        // 4. Phân trang (Mặc định 10 khách hàng mỗi trang)
-        $perPage = $request->input('perPage', 10);
-        $users = $query->paginate($perPage);
-
-        return response()->json($users);
     }
 
     // Hàm thay đổi trạng thái user (Active/Inactive)
     public function toggleStatus($id)
     {
-        $user = User::findOrFail($id);
+        try {
+            $user = \App\Models\User::find($id);
 
-        // Không cho phép tự khóa tài khoản của mình hoặc khóa admin khác tại đây
-        $user->status = ($user->status === 'active') ? 'inactive' : 'active';
-        $user->save();
+            if (!$user) {
+                return response()->json(['error' => 'Không tìm thấy người dùng'], 404);
+            }
 
-        return response()->json([
-            'message' => 'Cập nhật trạng thái thành công',
-            'data' => $user
-        ]);
+            // TRƯỜNG HỢP 1: Nếu cột status trong Database của bạn lưu CHỮ ('active', 'inactive')
+            $user->status = ($user->status === 'active') ? 'inactive' : 'active';
+
+            // TRƯỜNG HỢP 2: Nếu cột status trong Database của bạn lưu SỐ (1 là active, 0 là inactive)
+            // Hãy comment (//) trường hợp 1 lại và bỏ comment dòng dưới này:
+            // $user->status = ($user->status == 1) ? 0 : 1;
+
+            $user->save();
+
+            return response()->json([
+                'message' => 'Cập nhật trạng thái thành công',
+                'status'  => $user->status // Trả về status mới để React biết
+            ]);
+        } catch (\Exception $e) {
+            return response()->json(['error' => 'Lỗi: ' . $e->getMessage()], 500);
+        }
     }
 }
