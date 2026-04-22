@@ -38,4 +38,9 @@ class Product extends Model
     {
         return $this->belongsTo(Category::class, 'category_id');
     }
+    public function images()
+    {
+        // Thay 'ProductImage::class' bằng tên Model hình ảnh thực tế của bạn (ví dụ: Image::class)
+        return $this->hasMany(ProductImage::class); 
+    }
 }
