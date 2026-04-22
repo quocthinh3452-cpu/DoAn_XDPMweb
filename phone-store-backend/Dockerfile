@@ -1,5 +1,5 @@
 # Sử dụng image PHP 8.2 kèm theo máy chủ web Apache
-FROM php:8.2-apache
+FROM php:8.4-apache
 
 # Cài đặt các gói hệ thống và PHP extensions cần thiết cho Laravel
 RUN apt-get update && apt-get install -y \
