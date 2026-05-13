@@ -10,7 +10,7 @@ use App\Http\Controllers\Api\Admin\AdminDashboardController;
 use App\Http\Controllers\Api\Admin\AdminOrderController;
 use App\Http\Controllers\Api\Admin\AdminProductController;
 use App\Http\Controllers\Api\BannerController;
-
+use Illuminate\Support\Facades\Artisan;
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -49,7 +49,7 @@ Route::middleware('auth:sanctum')->group(function () {
     //admin banner
     Route::get('/admin/banners', [App\Http\Controllers\Api\BannerController::class, 'adminIndex']);
     Route::post('/admin/banners', [App\Http\Controllers\Api\BannerController::class, 'store']);
-    Route::put('/admin/banners/{id}', [App\Http\Controllers\Api\BannerController::class, 'update']); 
+    Route::put('/admin/banners/{id}', [App\Http\Controllers\Api\BannerController::class, 'update']);
     Route::delete('/admin/banners/{id}', [App\Http\Controllers\Api\BannerController::class, 'destroy']);
     // Admin Routes
     Route::middleware('check.admin')->prefix('admin')->group(function () {
@@ -67,7 +67,11 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::get('/products/{id}', [\App\Http\Controllers\Api\Admin\AdminProductController::class, 'show']);
         Route::post('/products/{id}', [\App\Http\Controllers\Api\Admin\AdminProductController::class, 'update']);
-        
+
         Route::apiResource('/admin/banners', BannerController::class);
+    });
+    Route::get('/fix-storage', function () {
+        Artisan::call('storage:link');
+        return "Đã tạo liên kết storage thành công!";
     });
 });
