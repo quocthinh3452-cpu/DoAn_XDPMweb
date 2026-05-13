@@ -19,7 +19,7 @@ function HomePage() {
     const [banners, setBanners] = useState([]); // ✅ ĐÃ THÊM DÒNG NÀY ĐỂ HẾT LỖI
     const [loading, setLoading] = useState(true);
     const { addToCart } = useCart();
-
+    const IMAGE_BASE_URL = "https://techstore-api-eajk.onrender.com";
     useEffect(() => {
         const fetchData = async () => {
             try {
@@ -68,7 +68,7 @@ function HomePage() {
                             <SwiperSlide key={banner.id}>
                                 <div className="relative w-full h-full">
                                     <img 
-                                        src={banner.full_image_url} 
+                                        src={banner.image_path ? `${IMAGE_BASE_URL}/storage/${banner.image_path}` : banner.full_image_url?.replace('http://127.0.0.1:8000', IMAGE_BASE_URL)} 
                                         alt={banner.title}
                                         className="w-full h-full object-cover"
                                     />
@@ -125,7 +125,7 @@ function HomePage() {
                             <Link to={`/products/${product.slug}`} className="flex-grow">
                                 <div className="overflow-hidden rounded-2xl mb-4 bg-gray-50 flex justify-center items-center h-56 p-4">
                                     <img
-                                        src={product.primary_image?.image_url || 'https://via.placeholder.com/300x300?text=No+Image'}
+                                        src={(product.primary_image?.image_url || 'https://via.placeholder.com/300').replace('http://127.0.0.1:8000', IMAGE_BASE_URL)}
                                         alt={product.name}
                                         className="max-h-full max-w-full object-contain group-hover:scale-110 transition-transform duration-500"
                                     />

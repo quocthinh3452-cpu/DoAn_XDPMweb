@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
-
+  const IMAGE_BASE_URL = "https://techstore-api-eajk.onrender.com";
   useEffect(() => {
     fetchProducts();
   }, []);
@@ -71,7 +71,7 @@ function AdminProducts() {
                   <td className="p-4">
                     <div className="w-12 h-12 bg-white border rounded-lg p-1 flex items-center justify-center">
                       <img
-                        src={product.primary_image?.image_url || product.images?.[0]?.image_url || 'https://via.placeholder.com/150'}
+                        src={(product.primary_image?.image_url || product.images?.[0]?.image_url || 'https://via.placeholder.com/150').replace('http://127.0.0.1:8000', IMAGE_BASE_URL)}
                         alt={product.name}
                         className="max-w-full max-h-full object-contain"
                       />
