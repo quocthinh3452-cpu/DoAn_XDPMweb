@@ -18,7 +18,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->validateCsrfTokens(except: [
             'api/*',
         ]);
-
+        $middleware->statefulApi();
         // 2. Đăng ký file CorsMiddleware bạn đã tạo để cho phép React gọi API
         $middleware->append(\App\Http\Middleware\CorsMiddleware::class);
 

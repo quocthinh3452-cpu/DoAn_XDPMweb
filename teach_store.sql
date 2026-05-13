@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: May 05, 2026 at 12:18 PM
+-- Generation Time: May 13, 2026 at 06:50 PM
 -- Server version: 9.1.0
 -- PHP Version: 8.3.14
 
@@ -24,6 +24,33 @@ SET time_zone = "+00:00";
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `banners`
+--
+
+DROP TABLE IF EXISTS `banners`;
+CREATE TABLE IF NOT EXISTS `banners` (
+  `id` int UNSIGNED NOT NULL AUTO_INCREMENT,
+  `title` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `image_url` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `link_url` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `order` int DEFAULT '0',
+  `is_active` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `banners`
+--
+
+INSERT INTO `banners` (`id`, `title`, `image_url`, `link_url`, `order`, `is_active`, `created_at`, `updated_at`) VALUES
+(2, 'Siêu giảm giá tai nghe siêu hot', 'banners/BruYiS1bVVJgKXh2n37rxMCaGLUoC0UUMNJnUkIs.jpg', NULL, 0, 1, '2026-05-13 10:40:33', '2026-05-13 10:50:07'),
+(3, 'Bàn phím đẹp new 2026', 'banners/URWVoFVbnnFBf422ddIxnZRGVZDdlpgp8exP8GiF.jpg', NULL, 0, 1, '2026-05-13 10:51:16', '2026-05-13 10:51:16');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `categories`
 --
 
@@ -37,7 +64,7 @@ CREATE TABLE IF NOT EXISTS `categories` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `categories_slug_unique` (`slug`),
   KEY `fk_category_parent` (`parent_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `categories`
@@ -46,7 +73,8 @@ CREATE TABLE IF NOT EXISTS `categories` (
 INSERT INTO `categories` (`id`, `parent_id`, `name`, `slug`, `is_active`) VALUES
 (1, NULL, 'Điện thoại', 'dien-thoai', 1),
 (2, NULL, 'Laptop', 'laptop', 1),
-(3, NULL, 'Phụ kiện', 'phu-kien', 1);
+(3, NULL, 'Phụ kiện', 'phu-kien', 1),
+(4, NULL, 'Tai nghe', 'tai-nghe', 1);
 
 -- --------------------------------------------------------
 
@@ -87,7 +115,8 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `shipping_fee` decimal(12,2) UNSIGNED NOT NULL,
   `discount_amount` decimal(12,2) UNSIGNED NOT NULL DEFAULT '0.00',
   `total_amount` decimal(12,2) UNSIGNED NOT NULL,
-  `status` enum('pending','processing','shipped','delivered','cancelled') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `status` enum('pending','processing','shipped','delivered','cancelled','cancel_requested') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'pending',
+  `cancel_reason` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `payment_method` enum('cod','vietqr','momo','zalopay') COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment_status` enum('unpaid','paid','failed','refunded') COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'unpaid',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
@@ -95,14 +124,14 @@ CREATE TABLE IF NOT EXISTS `orders` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `orders_order_code_unique` (`order_code`),
   KEY `fk_order_user` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=12 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `orders`
 --
 
-INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_email`, `customer_phone`, `shipping_address`, `subtotal`, `shipping_fee`, `discount_amount`, `total_amount`, `status`, `payment_method`, `payment_status`, `created_at`, `updated_at`) VALUES
-(1, 'TS1001', 5, 'thinh2304@gmail.com', '0912345678', '{\"city\": \"Hà Nội\", \"address\": \"Số 1 Xuân Thủy\", \"district\": \"Cầu Giấy\"}', 31490000.00, 30000.00, 0.00, 31520000.00, 'cancelled', 'cod', 'unpaid', '2026-04-14 16:53:16', '2026-04-21 07:33:25');
+INSERT INTO `orders` (`id`, `order_code`, `user_id`, `customer_email`, `customer_phone`, `shipping_address`, `subtotal`, `shipping_fee`, `discount_amount`, `total_amount`, `status`, `cancel_reason`, `payment_method`, `payment_status`, `created_at`, `updated_at`) VALUES
+(11, 'TS177868414286', 5, 'thinh2304@gmail.com', '0333461641', '\"230 tay thanh, quận 3, tp.hcm\"', 66490000.00, 30000.00, 0.00, 66520000.00, 'cancelled', 'tôi muốn cập nhật đơn hàng', 'cod', 'unpaid', '2026-05-13 07:55:42', '2026-05-13 09:07:46');
 
 -- --------------------------------------------------------
 
@@ -116,20 +145,23 @@ CREATE TABLE IF NOT EXISTS `order_items` (
   `order_id` bigint UNSIGNED NOT NULL,
   `product_id` bigint UNSIGNED DEFAULT NULL,
   `product_name` varchar(200) COLLATE utf8mb4_unicode_ci NOT NULL,
+  `color` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `storage` varchar(50) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `quantity` smallint UNSIGNED NOT NULL,
   `unit_price` decimal(12,2) UNSIGNED NOT NULL,
   `total_price` decimal(12,2) UNSIGNED NOT NULL,
   PRIMARY KEY (`id`),
   KEY `fk_item_order` (`order_id`),
   KEY `fk_item_product` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `order_items`
 --
 
-INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `quantity`, `unit_price`, `total_price`) VALUES
-(1, 1, 1, 'iPhone 15 Pro Max 256GB', 1, 31490000.00, 31490000.00);
+INSERT INTO `order_items` (`id`, `order_id`, `product_id`, `product_name`, `color`, `storage`, `quantity`, `unit_price`, `total_price`) VALUES
+(2, 11, 1, 'iPhone 15 Pro Max', NULL, NULL, 1, 31490000.00, 31490000.00),
+(3, 11, 8, 'Iphone 17 pro max', NULL, NULL, 1, 35000000.00, 35000000.00);
 
 -- --------------------------------------------------------
 
@@ -169,7 +201,7 @@ CREATE TABLE IF NOT EXISTS `personal_access_tokens` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `personal_access_tokens_token_unique` (`token`),
   KEY `personal_access_tokens_tokenable_type_tokenable_id_index` (`tokenable_type`,`tokenable_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=24 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=49 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `personal_access_tokens`
@@ -191,7 +223,15 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (14, 'App\\Models\\User', 5, 'auth_token', 'a299dc1a2da19afdc6c834575331b814e6d389aaf9f30bc2bd28f2ca7b2907b8', '[\"*\"]', NULL, NULL, '2026-04-16 02:54:46', '2026-04-16 02:54:46'),
 (15, 'App\\Models\\User', 5, 'auth_token', 'd90424079fd625ceab48fd4f9180cbc84f396ca4282345747f97709aae0e714e', '[\"*\"]', NULL, NULL, '2026-04-16 02:55:03', '2026-04-16 02:55:03'),
 (21, 'App\\Models\\User', 8, 'auth_token', 'acb3dc7b25dd3f4d90c01faae549b1088652726197b3821f3ae3153097ca0c27', '[\"*\"]', '2026-04-18 02:00:12', NULL, '2026-04-18 01:59:10', '2026-04-18 02:00:12'),
-(23, 'App\\Models\\User', 8, 'auth_token', 'c5f77a28c7586f7db7da637bac6248828d457845e34450357add7a8267606283', '[\"*\"]', '2026-05-05 04:48:31', NULL, '2026-04-18 02:43:40', '2026-05-05 04:48:31');
+(24, 'App\\Models\\User', 8, 'auth_token', 'aab4380ef815ce9a56b995f37ca011772f64b9f8f808e911ec366cfd976e622a', '[\"*\"]', '2026-05-05 05:35:59', NULL, '2026-05-05 05:35:21', '2026-05-05 05:35:59'),
+(25, 'App\\Models\\User', 8, 'auth_token', '4a296be6da5e51b705149b8ed0aed27925d3eceb70e6f25d91884432171c7c1f', '[\"*\"]', NULL, NULL, '2026-05-05 07:05:45', '2026-05-05 07:05:45'),
+(27, 'App\\Models\\User', 8, 'auth_token', 'f455f4eb269dc7ed15b21f897524fbc7a5b0c56a858fd14f91e3c34f68f93b4d', '[\"*\"]', NULL, NULL, '2026-05-05 07:31:30', '2026-05-05 07:31:30'),
+(28, 'App\\Models\\User', 8, 'auth_token', '1d9ed08184a82fea1b3db2c4a5a0cd4d93a33eaa2bb0a184f84410a0f3198425', '[\"*\"]', NULL, NULL, '2026-05-05 07:31:51', '2026-05-05 07:31:51'),
+(29, 'App\\Models\\User', 8, 'auth_token', '9ffb313c667afe61b160bbf5acc7412554cd0afa0db6e807df84eee19aac33cd', '[\"*\"]', NULL, NULL, '2026-05-05 07:33:16', '2026-05-05 07:33:16'),
+(30, 'App\\Models\\User', 8, 'auth_token', 'ea195653fe8162e37a32e6340ea4451b11b5a92a49cfedc23563361066bbff66', '[\"*\"]', NULL, NULL, '2026-05-05 07:44:26', '2026-05-05 07:44:26'),
+(31, 'App\\Models\\User', 8, 'auth_token', 'c9ac5b9a069cf3af7e19b1181b1265d5f591026b5e24c8c204611a2bb3c4ea37', '[\"*\"]', NULL, NULL, '2026-05-05 07:44:37', '2026-05-05 07:44:37'),
+(40, 'App\\Models\\User', 5, 'auth_token', 'ed6edaf860b2248894978755118815ee31ea739d6bf2fa8c2663260188a984da', '[\"*\"]', '2026-05-06 08:17:55', NULL, '2026-05-06 07:44:27', '2026-05-06 08:17:55'),
+(48, 'App\\Models\\User', 8, 'auth_token', '0dee37fce0244b006bedfdf6c648cf3ea3910c7987baabe1244175b469f3907a', '[\"*\"]', '2026-05-13 10:51:56', NULL, '2026-05-13 09:00:32', '2026-05-13 10:51:56');
 
 -- --------------------------------------------------------
 
@@ -221,7 +261,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   UNIQUE KEY `products_slug_unique` (`slug`),
   UNIQUE KEY `products_sku_unique` (`sku`),
   KEY `fk_product_category` (`category_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=9 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `products`
@@ -230,7 +270,35 @@ CREATE TABLE IF NOT EXISTS `products` (
 INSERT INTO `products` (`id`, `category_id`, `name`, `slug`, `sku`, `description`, `colors`, `storage`, `specs`, `regular_price`, `sale_price`, `stock_quantity`, `rating_avg`, `is_active`, `created_at`, `updated_at`) VALUES
 (1, 1, 'iPhone 15 Pro Max', 'iphone-15-pro-max-1776507364', 'IP15PM-256', NULL, '[\"Titan Xanh\", \"Titan Đen\", \"Titan Trắng\"]', '[\"256GB\", \"512GB\", \"1TB\"]', '{\"Ram\": \"8GB\", \"Chip\": \"A17 Pro\", \"Màn hình\": \"6.7 inch, Super Retina XDR\"}', 34990000.00, 31490000.00, 50, 0.00, 1, '2026-04-14 16:53:16', '2026-04-21 13:35:15'),
 (2, 1, 'Samsung Galaxy S24 Ultra', 'samsung-galaxy-s24-ultra', 'SS-S24U', NULL, NULL, NULL, NULL, 33990000.00, 29990000.00, 30, 0.00, 1, '2026-04-14 16:53:16', '2026-04-14 16:53:16'),
-(3, 2, 'MacBook Air M2 13 inch', 'macbook-air-m2-13-inch', 'MAC-M2-13', NULL, NULL, NULL, NULL, 27990000.00, 24990000.00, 14, 0.00, 1, '2026-04-14 16:53:16', '2026-05-05 04:46:48');
+(3, 2, 'MacBook Air M2 13 inch', 'macbook-air-m2-13-inch', 'MAC-M2-13', NULL, NULL, NULL, NULL, 27990000.00, 24990000.00, 14, 0.00, 1, '2026-04-14 16:53:16', '2026-05-05 04:46:48'),
+(8, 1, 'Iphone 17 pro max', 'iphone-17-pro-max-1778005589', 'Ip17-2025', NULL, NULL, NULL, NULL, 35000000.00, NULL, 0, 0.00, 1, '2026-05-05 11:26:29', '2026-05-05 11:26:29');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `product_attributes`
+--
+
+DROP TABLE IF EXISTS `product_attributes`;
+CREATE TABLE IF NOT EXISTS `product_attributes` (
+  `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT,
+  `product_id` bigint UNSIGNED NOT NULL,
+  `name` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `value` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `created_at` timestamp NULL DEFAULT NULL,
+  `updated_at` timestamp NULL DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  KEY `product_id` (`product_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+--
+-- Dumping data for table `product_attributes`
+--
+
+INSERT INTO `product_attributes` (`id`, `product_id`, `name`, `value`, `created_at`, `updated_at`) VALUES
+(11, 8, 'Ram', '16gb', '2026-05-05 11:53:58', '2026-05-05 11:53:58'),
+(12, 8, 'Dung lượng', '256GB, 512GB, 1TB', '2026-05-05 11:53:58', '2026-05-05 11:53:58'),
+(13, 8, 'Màu', 'đỏ, xanh, vàng', '2026-05-05 11:53:58', '2026-05-05 11:53:58');
 
 -- --------------------------------------------------------
 
@@ -246,7 +314,7 @@ CREATE TABLE IF NOT EXISTS `product_images` (
   `is_primary` tinyint UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   KEY `fk_image_product` (`product_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 --
 -- Dumping data for table `product_images`
@@ -255,7 +323,8 @@ CREATE TABLE IF NOT EXISTS `product_images` (
 INSERT INTO `product_images` (`id`, `product_id`, `image_url`, `is_primary`) VALUES
 (1, 1, 'https://cdn.tgdd.vn/Products/Images/42/305658/iphone-15-pro-max-blue-thumb-600x600.jpg', 1),
 (2, 2, 'https://cdn.tgdd.vn/Products/Images/42/307174/samsung-galaxy-s24-ultra-grey-thumb-600x600.jpg', 1),
-(3, 3, 'http://localhost:8000/storage/products/WSUvqCrbCplsyJAXTYu6tHsXhfWfriqhduitYGVE.jpg', 1);
+(3, 3, 'http://localhost:8000/storage/products/WSUvqCrbCplsyJAXTYu6tHsXhfWfriqhduitYGVE.jpg', 1),
+(7, 8, 'http://127.0.0.1:8000/storage/products/0PYSXHDLsmC7akgFe2SmfhNOQXk0OZb1EnwYmxvr.jpg', 1);
 
 -- --------------------------------------------------------
 
@@ -341,6 +410,12 @@ ALTER TABLE `order_status_histories`
 --
 ALTER TABLE `products`
   ADD CONSTRAINT `fk_product_category` FOREIGN KEY (`category_id`) REFERENCES `categories` (`id`) ON DELETE RESTRICT;
+
+--
+-- Constraints for table `product_attributes`
+--
+ALTER TABLE `product_attributes`
+  ADD CONSTRAINT `product_attributes_ibfk_1` FOREIGN KEY (`product_id`) REFERENCES `products` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `product_images`
