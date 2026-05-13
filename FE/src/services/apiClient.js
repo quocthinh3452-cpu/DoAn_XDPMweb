@@ -2,7 +2,8 @@ import axios from 'axios';
 
 // Khởi tạo instance của axios
 const apiClient = axios.create({
-    baseURL: 'http://127.0.0.1:8000/api',
+    // Sửa dòng này để dùng biến môi trường từ Vercel
+    baseURL: import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000/api',
     headers: {
         'Content-Type': 'application/json',
         'Accept': 'application/json',
