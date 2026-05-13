@@ -26,6 +26,11 @@ Route::get('/products', [ProductController::class, 'index']);
 Route::get('/products/{slug}', [ProductController::class, 'show']);
 Route::get('/categories', [\App\Http\Controllers\Api\CategoryController::class, 'index']);
 Route::get('/banners', [\App\Http\Controllers\Api\BannerController::class, 'index']);
+
+Route::get('/fix-storage', function () {
+    Artisan::call('storage:link');
+    return "Đã tạo liên kết storage thành công!";
+});
 // Protected User Routes
 Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', function (Request $request) {
@@ -70,8 +75,5 @@ Route::middleware('auth:sanctum')->group(function () {
 
         Route::apiResource('/admin/banners', BannerController::class);
     });
-    Route::get('/fix-storage', function () {
-        Artisan::call('storage:link');
-        return "Đã tạo liên kết storage thành công!";
-    });
+   
 });
