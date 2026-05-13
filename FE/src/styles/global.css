@@ -1,0 +1,52 @@
+@import "tailwindcss";
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  body {
+    /* Cập nhật màu nền sang trọng và font chữ Inter chuyên nghiệp */
+    background-color: #f8fafc; 
+    color: #0f172a;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  /* Các nút bấm giữ nguyên logic của bạn nhưng tinh chỉnh màu sắc cho sang hơn */
+  .btn-primary {
+    @apply bg-blue-600 text-white px-6 py-2 rounded-2xl font-bold hover:bg-blue-700 hover:shadow-lg hover:shadow-blue-100 transition-all duration-300 disabled:opacity-50;
+  }
+  
+  .btn-secondary {
+    @apply bg-slate-100 text-slate-700 px-6 py-2 rounded-2xl font-bold hover:bg-slate-200 transition-all duration-300;
+  }
+  
+  .input-field {
+    @apply w-full px-4 py-3 bg-white border border-slate-200 rounded-2xl focus:ring-4 focus:ring-blue-50 focus:border-blue-500 outline-none transition-all;
+  }
+
+  /* Định nghĩa Card sản phẩm kiểu chuyên nghiệp */
+  .product-card {
+    @apply bg-white border border-slate-100 rounded-[2rem] transition-all duration-500;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02), 0 10px 15px -3px rgba(0, 0, 0, 0.03);
+  }
+
+  .product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.05), 0 10px 10px -5px rgba(0, 0, 0, 0.02);
+    @apply border-blue-100;
+  }
+}
+
+/* Các hiệu ứng bổ trợ khác */
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

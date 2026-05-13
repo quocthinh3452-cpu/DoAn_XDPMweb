@@ -1,0 +1,89 @@
+/* ═══════════════════════════════════════════════════════════
+   LIGHT MODE — override via [data-theme="light"] on <html>
+   ThemeContext.jsx set/remove attribute này.
+═══════════════════════════════════════════════════════════ */
+[data-theme="light"] {
+  /* ── Surfaces ── */
+  --color-bg:        #f5f5f7;
+  --color-surface:   #ffffff;
+  --color-surface2:  #f0f0f5;
+  --color-surface3:  #e8e8f0;
+
+  /* ── Borders ── */
+  --color-border:    #dddde8;
+  --color-border2:   #c8c8d8;
+
+  /* ── Accent (giữ nguyên — nhận diện thương hiệu) ── */
+  --color-accent:     #6c5ff5;
+  --color-accent-hl:  #8b80ff;
+  --color-accent-dim: #5245c4;
+  --color-accent-sub: #e0deff;
+
+  /* ── Text ── */
+  --color-text:  #1a1a2e;
+  --color-text2: #3a3a5c;
+  --color-muted: #7878a0;
+
+  /* ── Semantic ── */
+  --color-green:  #1a9e52;
+  --color-yellow: #d97706;
+  --color-red:    #dc3545;
+  --color-blue:   #2563eb;
+
+  /* ── Shadows (lighter for light mode) ── */
+  --shadow-card:        0 1px 4px rgba(0,0,0,0.08), 0 1px 0 rgba(0,0,0,0.04);
+  --shadow-card-hover:  0 8px 24px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-raised:      0 1px 3px rgba(0,0,0,0.10), 0 1px 0 rgba(255,255,255,0.8) inset;
+  --shadow-dropdown:    0 8px 32px rgba(0,0,0,0.14), 0 2px 8px rgba(0,0,0,0.08);
+  --shadow-modal:       0 16px 48px rgba(0,0,0,0.20), 0 4px 16px rgba(0,0,0,0.12);
+
+  /* ── Body background ── */
+  background: var(--color-bg);
+  color: var(--color-text);
+}
+
+/* Bridge vars cho light mode */
+[data-theme="light"] body,
+[data-theme="light"] {
+  --bg:         var(--color-bg);
+  --surface:    var(--color-surface);
+  --surface-2:  var(--color-surface2);
+  --surface-3:  var(--color-surface3);
+  --border:     var(--color-border);
+  --border-2:   var(--color-border2);
+  --accent:     var(--color-accent);
+  --text:       var(--color-text);
+  --text-2:     var(--color-text2);
+  --text-muted: var(--color-muted);
+}
+
+/* Scrollbar light mode */
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: var(--color-border2);
+}
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--color-muted);
+}
+
+/* Smooth transition khi switch theme */
+html {
+  transition:
+    background-color 300ms ease,
+    color 300ms ease;
+}
+
+/* Prevent flash on individual elements */
+*, *::before, *::after {
+  transition-property: background-color, border-color, color, box-shadow;
+  transition-duration: 250ms;
+  transition-timing-function: ease;
+}
+
+/* NHƯNG: tắt transition cho animation-heavy elements để không lag */
+[data-theme] svg,
+[data-theme] img,
+[data-theme] video,
+[data-theme] canvas,
+[data-theme] .no-theme-transition {
+  transition: none !important;
+}

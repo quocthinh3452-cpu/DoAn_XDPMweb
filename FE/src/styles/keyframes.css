@@ -1,0 +1,47 @@
+/* ═══════════════════════════════════════════════════════════
+   KEYFRAMES — All animation definitions
+═══════════════════════════════════════════════════════════ */
+@keyframes shimmer       { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+@keyframes spin          { to { transform: rotate(360deg); } }
+@keyframes fadeIn        { from { opacity: 0; } to { opacity: 1; } }
+@keyframes fadeUp        { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slideUp       { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes popIn         { 0% { transform: scale(0.6); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes heartPop      { 0% { transform: scale(1); } 40% { transform: scale(1.4); } 70% { transform: scale(0.88); } 100% { transform: scale(1); } }
+@keyframes toastIn       { from { opacity: 0; transform: translateX(20px) scale(0.96); } to { opacity: 1; transform: translateX(0) scale(1); } }
+@keyframes toastProgress { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@keyframes progress      { from { width: 0%; } to { width: 100%; } }
+@keyframes marquee       { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+@keyframes float1        { 0%,100% { transform: rotate(-4deg) translateY(-6px); } 50% { transform: rotate(-4deg) translateY(2px); } }
+@keyframes float2        { 0%,100% { transform: rotate(3deg) translateY(4px); } 50% { transform: rotate(3deg) translateY(-4px); } }
+@keyframes megaIn        { from { opacity: 0; transform: translateX(-50%) translateY(-10px) scale(0.97); } to { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); } }
+@keyframes dropIn        { from { opacity: 0; transform: translateY(-8px) scale(0.97); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes floatDigit    { 0%,100% { transform: translateY(0) rotate(0deg); } 33% { transform: translateY(-20px) rotate(3deg); } 66% { transform: translateY(10px) rotate(-2deg); } }
+
+@keyframes glitch-1 {
+  0%,90%,100% { transform: translate(0); opacity: 0; }
+  91%  { transform: translate(-4px, 2px);  opacity: 0.8; }
+  93%  { transform: translate(3px, -1px);  opacity: 0.8; }
+  95%  { transform: translate(-2px, 1px);  opacity: 0.8; }
+  97%  { transform: translate(0);          opacity: 0;   }
+}
+@keyframes glitch-2 {
+  0%,88%,100% { transform: translate(0); opacity: 0; }
+  89%  { transform: translate(4px, -2px);  opacity: 0.7; }
+  91%  { transform: translate(-3px, 1px);  opacity: 0.7; }
+  93%  { transform: translate(2px, -1px);  opacity: 0.7; }
+  95%  { transform: translate(0);          opacity: 0;   }
+}
+@keyframes shake {
+  0%,100% { transform: translateX(0); }
+  20%  { transform: translateX(-6px) rotate(-2deg); }
+  40%  { transform: translateX(6px)  rotate(2deg);  }
+  60%  { transform: translateX(-4px); }
+  80%  { transform: translateX(4px);  }
+}
+
+/* ── Reduced motion overrides ── */
+@media (prefers-reduced-motion: reduce) {
+  .motion-marquee { animation: none !important; transform: none !important; }
+  .motion-float   { animation: none !important; }
+}

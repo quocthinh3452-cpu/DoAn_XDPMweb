@@ -1,0 +1,590 @@
+/* ═══════════════════════════════════════════════════════════════════
+   FORMS — complete field system
+   .field-group      wrapper for label + input + error
+   .field-label      uppercase micro label
+   .field-wrap       the input row (icon + input + suffix)
+   .field-input      the bare <input> / <select>
+   .field-icon       leading icon slot
+   .field-valid      trailing ✓ icon
+   .field-error      error message row
+   .field-select     <select> specific overrides
+   .field-wrap--focused / --error / --filled states
+
+   Info banners:
+   .info-banner       generic banner shell
+   .info-banner--green / --yellow / --blue / --red
+═══════════════════════════════════════════════════════════════════ */
+
+/* ── Keyframes ─────────────────────────────────────────────────── */
+@keyframes field-error-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes field-valid-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  70%  { transform: scale(1.15); }
+  100% { transform: scale(1);   opacity: 1; }
+}
+
+@keyframes field-focus-glow {
+  from { box-shadow: var(--field-focus-ring-0); }
+  to   { box-shadow: var(--field-focus-ring); }
+}
+
+/* ── Tokens ─────────────────────────────────────────────────────── */
+:root {
+  /* field geometry */
+  --field-height:       3rem;        /* 48px — roomy, touch-friendly */
+  --field-radius:       0.875rem;    /* 14px */
+  --field-px:           1rem;        /* 16px horizontal padding */
+  --field-icon-size:    1.0625rem;   /* 17px */
+  --field-font:         0.875rem;    /* 14px */
+
+  /* resting border */
+  --field-border:       var(--color-border);
+  --field-bg:           var(--color-bg);
+
+  /* focused */
+  --field-focus-border: var(--color-accent);
+  --field-focus-ring-0: 0 0 0 0px   rgba(124,111,247,0);
+  --field-focus-ring:   0 0 0 3.5px rgba(124,111,247,0.13);
+
+  /* error */
+  --field-error-border: rgba(240,96,96,0.50);
+  --field-error-ring:   0 0 0 3.5px rgba(240,96,96,0.09);
+  --field-error-bg:     rgba(240,96,96,0.025);
+
+  /* valid */
+  --field-valid-color:  rgba(34,197,94,0.65);
+
+  /* label */
+  --field-label-size:   0.65rem;     /* 10.4px */
+  --field-label-track:  0.13em;
+}
+
+/* ── .field-group — outer wrapper ──────────────────────────────── */
+.field-group {
+  display:        flex;
+  flex-direction: column;
+  gap:            0.375rem;   /* 6px */
+}
+
+/* ── .field-label ───────────────────────────────────────────────── */
+.field-label {
+  display:        flex;
+  align-items:    center;
+  gap:            0.25rem;
+  font-family:    var(--font-display);
+  font-size:      var(--field-label-size);
+  font-weight:    700;
+  letter-spacing: var(--field-label-track);
+  text-transform: uppercase;
+  color:          var(--color-muted);
+  opacity:        0.7;
+  transition:     color 180ms ease, opacity 180ms ease;
+  user-select:    none;
+}
+
+.field-label .field-required {
+  color:   rgba(240, 96, 96, 0.55);
+  font-size: 0.7rem;
+}
+
+/* State overrides applied via JS classnames on .field-group */
+.field-group.is-focused  .field-label { color: var(--color-accent);    opacity: 1; }
+.field-group.is-error    .field-label { color: rgba(240,96,96,0.80);   opacity: 1; }
+.field-group.is-valid    .field-label { color: var(--color-muted);      opacity: 0.65; }
+
+/* ── .field-wrap — the input shell ──────────────────────────────── */
+.field-wrap {
+  position:        relative;
+  display:         flex;
+  align-items:     center;
+  gap:             0.625rem;   /* 10px */
+  height:          var(--field-height);
+  padding:         0 var(--field-px);
+  background:      var(--field-bg);
+  border:          1.5px solid var(--field-border);
+  border-radius:   var(--field-radius);
+  transition:
+    border-color 180ms ease,
+    box-shadow   220ms cubic-bezier(0.22, 1, 0.36, 1),
+    background   180ms ease;
+  cursor:          text;
+}
+
+/* Bottom accent line — slides up on focus */
+.field-wrap::after {
+  content:          '';
+  position:         absolute;
+  bottom:           -1.5px;
+  left:             50%;
+  right:            50%;
+  height:           2px;
+  background:       var(--color-accent);
+  border-radius:    0 0 2px 2px;
+  transition:       left 260ms cubic-bezier(0.22,1,0.36,1),
+                    right 260ms cubic-bezier(0.22,1,0.36,1),
+                    opacity 260ms ease;
+  opacity:          0;
+}
+
+/* hover (resting) */
+.field-wrap:hover:not(.field-wrap--focused):not(.field-wrap--error) {
+  border-color: var(--color-border2);
+}
+
+/* focused */
+.field-wrap--focused {
+  border-color: var(--field-focus-border);
+  box-shadow:   var(--field-focus-ring);
+  background:   color-mix(in srgb, var(--color-accent) 2.5%, var(--field-bg));
+}
+.field-wrap--focused::after {
+  left:    6%;
+  right:   6%;
+  opacity: 1;
+}
+
+/* error */
+.field-wrap--error {
+  border-color: var(--field-error-border);
+  box-shadow:   var(--field-error-ring);
+  background:   var(--field-error-bg);
+}
+.field-wrap--error::after {
+  background: rgba(240,96,96,0.7);
+  left:    6%;
+  right:   6%;
+  opacity: 1;
+}
+
+/* ── .field-icon ────────────────────────────────────────────────── */
+.field-icon {
+  display:     flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width:       var(--field-icon-size);
+  height:      var(--field-icon-size);
+  color:       var(--color-muted);
+  opacity:     0.38;
+  transition:  color 180ms ease, opacity 180ms ease;
+  pointer-events: none;
+}
+.field-icon svg { width: 100%; height: 100%; }
+
+.field-wrap--focused .field-icon { color: var(--color-accent); opacity: 0.75; }
+.field-wrap--error   .field-icon { color: rgba(240,96,96,1);   opacity: 0.45; }
+
+/* ── .field-input ────────────────────────────────────────────────── */
+.field-input {
+  flex:        1;
+  min-width:   0;
+  height:      100%;
+  background:  transparent;
+  border:      none;
+  outline:     none;
+  font-size:   var(--field-font);
+  font-weight: 500;
+  color:       var(--color-text);
+  caret-color: var(--color-accent);
+  line-height: 1;
+}
+.field-input::placeholder {
+  color:   var(--color-muted);
+  opacity: 0.30;
+  font-weight: 400;
+}
+/* Remove autofill blue background */
+.field-input:-webkit-autofill,
+.field-input:-webkit-autofill:hover,
+.field-input:-webkit-autofill:focus {
+  -webkit-box-shadow:    0 0 0 100px var(--field-bg) inset;
+  -webkit-text-fill-color: var(--color-text);
+  transition: background-color 9999s ease-in-out 0s;
+}
+
+/* ── .field-select — <select> extras ───────────────────────────── */
+.field-select {
+  appearance:  none;
+  cursor:      pointer;
+  padding-right: 2rem;   /* room for chevron */
+}
+.field-select:invalid,
+.field-select option[value=""] {
+  color: var(--color-muted);
+  opacity: 0.30;
+}
+.field-select option {
+  color:      var(--color-text);
+  background: var(--color-surface);
+  opacity:    1;
+  font-weight: 500;
+}
+
+/* Chevron icon inside select wrap */
+.field-chevron {
+  position:       absolute;
+  right:          var(--field-px);
+  top:            50%;
+  transform:      translateY(-50%);
+  width:          0.875rem;
+  height:         0.875rem;
+  color:          var(--color-muted);
+  opacity:        0.40;
+  pointer-events: none;
+  transition:     transform 250ms cubic-bezier(0.22,1,0.36,1), opacity 180ms ease;
+}
+.field-chevron svg { width: 100%; height: 100%; }
+.field-wrap--focused .field-chevron {
+  transform: translateY(-50%) rotate(180deg);
+  opacity: 0.65;
+}
+
+/* ── .field-valid — trailing ✓ ──────────────────────────────────── */
+.field-valid {
+  display:     flex;
+  align-items: center;
+  flex-shrink: 0;
+  width:       1rem;
+  height:      1rem;
+  color:       var(--field-valid-color);
+  animation:   field-valid-pop 280ms cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.field-valid svg { width: 100%; height: 100%; }
+
+/* ── .field-error — message row ─────────────────────────────────── */
+.field-error {
+  display:     flex;
+  align-items: center;
+  gap:         0.3125rem;   /* 5px */
+  font-size:   0.6875rem;   /* 11px */
+  font-weight: 600;
+  color:       rgba(240,96,96,0.82);
+  animation:   field-error-in 180ms ease both;
+}
+.field-error svg {
+  width:       0.75rem;
+  height:      0.75rem;
+  flex-shrink: 0;
+}
+
+/* ── Info banners ───────────────────────────────────────────────── */
+.info-banner {
+  display:       flex;
+  align-items:   flex-start;
+  gap:           0.75rem;
+  padding:       0.75rem 1rem;
+  border-radius: 0.875rem;
+  border:        1px solid transparent;
+}
+
+.info-banner__icon {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  width:           1.75rem;
+  height:          1.75rem;
+  border-radius:   50%;
+  flex-shrink:     0;
+  margin-top:      0.0625rem;
+}
+.info-banner__icon svg { width: 0.875rem; height: 0.875rem; }
+
+.info-banner__body { flex: 1; min-width: 0; }
+.info-banner__title {
+  font-size:   0.75rem;
+  font-weight: 600;
+  line-height: 1.3;
+}
+.info-banner__sub {
+  font-size:   0.6875rem;
+  margin-top:  0.1875rem;
+  line-height: 1.45;
+  opacity:     0.70;
+}
+
+/* green */
+.info-banner--green {
+  background:   rgba(34,197,94,0.045);
+  border-color: rgba(34,197,94,0.16);
+}
+.info-banner--green .info-banner__icon {
+  background: rgba(34,197,94,0.13);
+  color:      rgba(34,197,94,0.90);
+}
+.info-banner--green .info-banner__title { color: rgba(34,197,94,0.88); }
+.info-banner--green .info-banner__sub   { color: rgba(34,197,94,0.88); }
+
+/* yellow */
+.info-banner--yellow {
+  background:   rgba(234,179,8,0.04);
+  border-color: rgba(234,179,8,0.18);
+}
+.info-banner--yellow .info-banner__icon {
+  background: rgba(234,179,8,0.12);
+  color:      rgba(234,179,8,0.90);
+}
+.info-banner--yellow .info-banner__title { color: rgba(234,179,8,0.85); }
+.info-banner--yellow .info-banner__sub   { color: rgba(234,179,8,0.85); }
+
+/* blue */
+.info-banner--blue {
+  background:   rgba(59,130,246,0.04);
+  border-color: rgba(59,130,246,0.16);
+}
+.info-banner--blue .info-banner__icon {
+  background: rgba(59,130,246,0.12);
+  color:      rgba(59,130,246,0.90);
+}
+.info-banner--blue .info-banner__title { color: rgba(59,130,246,0.85); }
+.info-banner--blue .info-banner__sub   { color: rgba(59,130,246,0.85); }
+
+/* red */
+.info-banner--red {
+  background:   rgba(240,96,96,0.045);
+  border-color: rgba(240,96,96,0.18);
+}
+.info-banner--red .info-banner__icon {
+  background: rgba(240,96,96,0.12);
+  color:      rgba(240,96,96,0.90);
+}
+.info-banner--red .info-banner__title { color: rgba(240,96,96,0.85); }
+.info-banner--red .info-banner__sub   { color: rgba(240,96,96,0.85); }
+
+/* ── Panel cards (bank details, ewallet, etc.) ──────────────────── */
+.detail-panel {
+  border-radius: 1rem;
+  border:        1px solid var(--color-border);
+  overflow:      hidden;
+  animation:     field-error-in 200ms ease both;  /* reuse fade-up */
+}
+.detail-panel__header {
+  display:       flex;
+  align-items:   center;
+  gap:           0.5rem;
+  padding:       0.625rem 1.25rem;
+  border-bottom: 1px solid var(--color-border);
+  background:    color-mix(in srgb, var(--color-surface2) 70%, transparent);
+}
+.detail-panel__dot {
+  width:         6px;
+  height:        6px;
+  border-radius: 50%;
+  flex-shrink:   0;
+}
+.detail-panel__heading {
+  font-family:    var(--font-display);
+  font-size:      0.65rem;
+  font-weight:    700;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color:          var(--color-muted);
+}
+.detail-panel__body {
+  padding:    1rem 1.25rem;
+  background: var(--color-surface);
+}
+.detail-panel__footer {
+  display:       flex;
+  align-items:   flex-start;
+  gap:           0.5rem;
+  padding:       0.625rem 1.25rem;
+  border-top:    1px solid var(--color-border);
+  font-size:     0.6875rem;
+  line-height:   1.5;
+}
+
+/* Detail row inside panel body */
+.detail-row {
+  display:         flex;
+  justify-content: space-between;
+  align-items:     center;
+  gap:             1rem;
+}
+.detail-row + .detail-row { margin-top: 0.75rem; }
+.detail-row__label {
+  font-size:   0.75rem;
+  color:       var(--color-muted);
+  font-weight: 500;
+  text-transform: capitalize;
+}
+.detail-row__value {
+  font-family:    var(--font-mono, monospace);
+  font-size:      0.75rem;
+  font-weight:    700;
+  letter-spacing: 0.06em;
+  background:     var(--color-surface2);
+  border:         1px solid var(--color-border);
+  padding:        0.25rem 0.625rem;
+  border-radius:  0.5rem;
+  color:          var(--color-text2);
+}
+
+/* Wallet chips */
+.wallet-chip {
+  padding:       0.375rem 0.875rem;
+  background:    var(--color-surface2);
+  border:        1px solid var(--color-border);
+  border-radius: 0.625rem;
+  font-size:     0.75rem;
+  font-weight:   700;
+  color:         var(--color-text2);
+  transition:    border-color 180ms ease, background 180ms ease;
+  cursor:        default;
+}
+.wallet-chip:hover { border-color: color-mix(in srgb, var(--color-accent) 30%, var(--color-border)); }
+
+/* ── Payment method cards ─────────────────────────────────────── */
+.pay-card {
+  position:        relative;
+  width:           100%;
+  display:         flex;
+  align-items:     center;
+  gap:             1rem;
+  padding:         1rem 1.125rem;
+  border-radius:   1rem;
+  border:          1.5px solid var(--color-border);
+  background:      var(--color-surface);
+  text-align:      left;
+  cursor:          pointer;
+  overflow:        hidden;
+  transition:
+    border-color 200ms ease,
+    box-shadow   250ms cubic-bezier(0.22,1,0.36,1),
+    background   200ms ease,
+    transform    160ms cubic-bezier(0.34,1.56,0.64,1);
+}
+
+/* shimmer sweep on hover */
+.pay-card::before {
+  content:    '';
+  position:   absolute;
+  inset:      0;
+  background: linear-gradient(110deg, transparent 38%, rgba(255,255,255,0.032) 50%, transparent 62%);
+  opacity:    0;
+  transition: opacity 300ms ease;
+  pointer-events: none;
+}
+.pay-card:hover:not(.pay-card--selected)::before { opacity: 1; }
+.pay-card:hover:not(.pay-card--selected) {
+  border-color: var(--color-border2);
+  box-shadow:   0 2px 10px rgba(0,0,0,0.06);
+  transform:    translateY(-1px);
+}
+.pay-card:active { transform: translateY(0) scale(0.995); }
+
+.pay-card--selected {
+  border-color: var(--color-accent);
+  background:   color-mix(in srgb, var(--color-accent) 5.5%, var(--color-surface));
+  box-shadow:
+    0 0 0 1px rgba(124,111,247,0.14),
+    0 6px 28px rgba(124,111,247,0.12);
+}
+
+/* icon badge */
+.pay-card__icon {
+  width:           2.625rem;  /* 42px */
+  height:          2.625rem;
+  border-radius:   0.75rem;
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  font-size:       1.25rem;
+  line-height:     1;
+  flex-shrink:     0;
+  background:      var(--color-surface2);
+  transition:      background 200ms ease, box-shadow 200ms ease;
+}
+.pay-card--selected .pay-card__icon {
+  background:  color-mix(in srgb, var(--color-accent) 13%, transparent);
+  box-shadow:  0 0 0 1px rgba(124,111,247,0.22);
+}
+
+/* text block */
+.pay-card__label {
+  font-size:   0.875rem;
+  font-weight: 600;
+  color:       var(--color-text2);
+  line-height: 1.25;
+  margin-bottom: 0.1875rem;
+  transition:  color 150ms ease;
+}
+.pay-card:hover .pay-card__label,
+.pay-card--selected .pay-card__label { color: var(--color-text); }
+
+.pay-card__desc {
+  font-size:   0.75rem;
+  color:       var(--color-muted);
+  line-height: 1.4;
+}
+
+/* radio dot */
+.pay-card__radio {
+  width:        1.125rem;
+  height:       1.125rem;
+  border-radius: 50%;
+  border:       2px solid var(--color-border);
+  display:      flex;
+  align-items:  center;
+  justify-content: center;
+  flex-shrink:  0;
+  transition:   border-color 200ms ease, background 200ms ease, box-shadow 200ms ease;
+  margin-left:  auto;
+}
+.pay-card--selected .pay-card__radio {
+  border-color: var(--color-accent);
+  background:   var(--color-accent);
+  box-shadow:   0 2px 8px rgba(124,111,247,0.38);
+}
+.pay-card__radio-dot {
+  width:         7px;
+  height:        7px;
+  border-radius: 50%;
+  background:    white;
+  transform:     scale(0);
+  transition:    transform 200ms cubic-bezier(0.34,1.56,0.64,1);
+}
+.pay-card--selected .pay-card__radio-dot { transform: scale(1); }
+
+/* ── Security badge row ──────────────────────────────────────────── */
+.security-row {
+  display:         flex;
+  align-items:     center;
+  justify-content: center;
+  gap:             1.5rem;
+  padding-top:     1.25rem;
+  margin-top:      1.25rem;
+  border-top:      1px solid var(--color-border);
+}
+.security-item {
+  display:     flex;
+  align-items: center;
+  gap:         0.375rem;
+}
+.security-item__icon {
+  font-size: 0.875rem;
+  line-height: 1;
+  opacity: 0.45;
+}
+.security-item__label {
+  font-size:   0.6875rem;
+  font-weight: 500;
+  color:       var(--color-muted);
+  opacity:     0.55;
+}
+
+/* ── Reduced motion ──────────────────────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  .field-wrap,
+  .field-wrap::after,
+  .field-icon,
+  .field-chevron   { transition: none; }
+  .field-error     { animation: none; }
+  .field-valid     { animation: none; }
+  .detail-panel    { animation: none; }
+  .pay-card        { transition: border-color 0ms, box-shadow 0ms; }
+  .pay-card:hover  { transform: none; }
+}
